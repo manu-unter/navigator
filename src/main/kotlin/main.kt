@@ -1,45 +1,80 @@
 import androidx.compose.desktop.Window
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
 import androidx.compose.runtime.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import java.io.File
 
 fun main() = Window {
-    var path by remember { mutableStateOf<String>("")}
-    val fileSystemWalkerScope = rememberCoroutineScope { Dispatchers.IO }
-    var currentFileWalkerJob by remember { mutableStateOf<Job?>(null)}
-    var fileTreeWalk by remember { mutableStateOf<FileTreeWalk?>(null)}
+    var path by remember { mutableStateOf("C:\\Users\\mane\\Downloads") }
 
-    fun readFileTree(path: String) {
-        currentFileWalkerJob?.cancel()
-        currentFileWalkerJob = fileSystemWalkerScope.async {
-            println(coroutineContext)
-            fileTreeWalk = File(path).walk()
-        }
-    }
+    val scrollState = rememberScrollState()
+    val scrollbarAdapter = rememberScrollbarAdapter(scrollState)
 
     MaterialTheme {
-        Row {
+        Column {
             TextField(path, onValueChange = {
                 path = it
-                readFileTree(it)
             })
+            Box {
+                Column(Modifier.verticalScroll(scrollState)) {
+                    NodeEntry(FileSystemNode(File(path)))
+                }
+                VerticalScrollbar(scrollbarAdapter, Modifier.align(Alignment.CenterEnd))
+            }
         }
+    }
+}
+
+interface Node {
+    val label: String
+    fun listChildren(): List<Node>
+}
+
+class FileSystemNode(private val file: File) : Node {
+    override val label: String get() = file.name
+    override fun listChildren(): List<Node> {
+        return if (file.isDirectory) {
+            file.listFiles()?.map { FileSystemNode(it) } ?: emptyList()
+        } else {
+            emptyList()
+        }
+    }
+}
+
+@Composable
+fun NodeEntry(node: Node, modifier: Modifier = Modifier) {
+    var isExpanded by remember { mutableStateOf(false) }
+    val children by produceState<List<Node>?>(null, node) {
+        // Done asynchronously to avoid freezes with lots of files in a directory
+        value = node.listChildren()
+    }
+
+    Column(modifier) {
         Row {
-            if (fileTreeWalk != null) {
-                LazyColumn {
-                    fileTreeWalk?.forEach {
-                        item {
-                            Row {
-                                Text(it.name)
-                            }
-                        }
+            if (children == null) {
+                Text("...")
+            } else if (children != null && children!!.count() > 0) {
+                Button(onClick = { isExpanded = !isExpanded }) {
+                    if (isExpanded) {
+                        Text("-")
+                    } else {
+                        Text("+")
                     }
                 }
+            } else {
+                Text(" ") // TODO Replace with Chevron icons
+            }
+            Text(node.label)
+        }
+        Divider()
+        if (isExpanded) {
+            children?.forEach {
+                NodeEntry(it)
             }
         }
     }
