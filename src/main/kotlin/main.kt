@@ -41,7 +41,13 @@ class FileSystemNode(private val file: File) : Node {
     override val label: String get() = file.name
     override fun listChildren(): List<Node> {
         return if (file.isDirectory) {
-            file.listFiles()?.map { FileSystemNode(it) } ?: emptyList()
+            // Apparently the isDirectory check above isn't enough to ensure that we're dealing with directories here,
+            // which is why listFiles() can still return null in some cases
+            file.listFiles()?.let { arrayOfFiles ->
+                arrayOfFiles.sortWith(comparator = compareBy({ !it.isDirectory }, { it.name }))
+                arrayOfFiles.map { FileSystemNode(it) }
+            }
+                ?: emptyList()
         } else {
             emptyList()
         }
