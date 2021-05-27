@@ -1,12 +1,14 @@
 import androidx.compose.desktop.Window
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
@@ -19,14 +21,14 @@ fun main() = Window {
     val scrollState = rememberScrollState()
     val scrollbarAdapter = rememberScrollbarAdapter(scrollState)
 
+    val selectionState = remember { mutableStateOf<Node?>(null) }
+
     MaterialTheme {
         Column {
-            TextField(path, onValueChange = {
-                path = it
-            })
+            TextField(value = path, onValueChange = { path = it })
             Box {
                 Column(Modifier.verticalScroll(scrollState)) {
-                    NodeEntry(FileSystemNode(File(path)))
+                    NodeEntry(FileSystemNode(File(path)), selectionState)
                 }
                 VerticalScrollbar(scrollbarAdapter, Modifier.align(Alignment.CenterEnd))
             }
@@ -58,8 +60,9 @@ class FileSystemNode(private val file: File) : Node {
 val ICON_SIZE = 24.dp
 
 @Composable
-fun NodeEntry(node: Node, indentation: Int = 0, modifier: Modifier = Modifier) {
+fun NodeEntry(node: Node, selectionState: MutableState<Node?>, indentation: Int = 0, modifier: Modifier = Modifier) {
     var isExpanded by remember { mutableStateOf(false) }
+    val isSelected = selectionState.value === node
     val children by produceState<List<Node>?>(null, node) {
         withContext(Dispatchers.IO) {
             // Done asynchronously to avoid freezes with lots of files in a directory
@@ -67,14 +70,25 @@ fun NodeEntry(node: Node, indentation: Int = 0, modifier: Modifier = Modifier) {
         }
     }
 
-    Column(modifier) {
-        Row {
+    Column(modifier.fillMaxWidth()) {
+        Row(
+            Modifier.fillMaxWidth()
+                .background(color = if (isSelected) MaterialTheme.colors.secondary else Color.Transparent)
+                .selectable(selected = isSelected) { selectionState.value = node }) {
             Spacer(Modifier.width(ICON_SIZE * indentation))
             if (children != null && children!!.count() > 0) {
                 if (isExpanded) {
-                    NodeIcon(Icons.Default.KeyboardArrowDown, "Collapse", Modifier.clickable { isExpanded = false })
+                    NodeIcon(
+                        Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Collapse",
+                        Modifier.clickable { isExpanded = false }
+                    )
                 } else {
-                    NodeIcon(Icons.Default.KeyboardArrowRight, "Expand", Modifier.clickable { isExpanded = true })
+                    NodeIcon(
+                        Icons.Default.KeyboardArrowRight,
+                        contentDescription = "Expand",
+                        Modifier.clickable { isExpanded = true }
+                    )
                 }
             } else {
                 Spacer(Modifier.size(ICON_SIZE))
@@ -83,7 +97,7 @@ fun NodeEntry(node: Node, indentation: Int = 0, modifier: Modifier = Modifier) {
         }
         if (isExpanded) {
             children?.forEach {
-                NodeEntry(it, indentation = indentation + 1)
+                NodeEntry(it, selectionState, indentation = indentation + 1)
             }
         }
     }
