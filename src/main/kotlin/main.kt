@@ -1,12 +1,14 @@
 import androidx.compose.desktop.Window
 import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import java.io.File
 
 fun main() = Window {
@@ -46,8 +48,10 @@ class FileSystemNode(private val file: File) : Node {
     }
 }
 
+val ICON_SIZE = 24.dp
+
 @Composable
-fun NodeEntry(node: Node, modifier: Modifier = Modifier) {
+fun NodeEntry(node: Node, indentation: Int = 0, modifier: Modifier = Modifier) {
     var isExpanded by remember { mutableStateOf(false) }
     val children by produceState<List<Node>?>(null, node) {
         // Done asynchronously to avoid freezes with lots of files in a directory
@@ -56,26 +60,27 @@ fun NodeEntry(node: Node, modifier: Modifier = Modifier) {
 
     Column(modifier) {
         Row {
-            if (children == null) {
-                Text("...")
-            } else if (children != null && children!!.count() > 0) {
-                Button(onClick = { isExpanded = !isExpanded }) {
-                    if (isExpanded) {
-                        Text("-")
-                    } else {
-                        Text("+")
-                    }
+            Spacer(Modifier.width(ICON_SIZE * indentation))
+            if (children != null && children!!.count() > 0) {
+                if (isExpanded) {
+                    NodeIcon(Icons.Default.KeyboardArrowDown, "Collapse", Modifier.clickable { isExpanded = false })
+                } else {
+                    NodeIcon(Icons.Default.KeyboardArrowRight, "Expand", Modifier.clickable { isExpanded = true })
                 }
             } else {
-                Text(" ") // TODO Replace with Chevron icons
+                Spacer(Modifier.size(ICON_SIZE))
             }
             Text(node.label)
         }
-        Divider()
         if (isExpanded) {
             children?.forEach {
-                NodeEntry(it)
+                NodeEntry(it, indentation = indentation + 1)
             }
         }
     }
+}
+
+@Composable
+fun NodeIcon(imageVector: ImageVector, contentDescription: String, modifier: Modifier = Modifier) {
+    Icon(imageVector, contentDescription, modifier.size(ICON_SIZE))
 }
