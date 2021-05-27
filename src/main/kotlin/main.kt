@@ -9,6 +9,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 
 fun main() = Window {
@@ -41,8 +43,7 @@ class FileSystemNode(private val file: File) : Node {
     override val label: String get() = file.name
     override fun listChildren(): List<Node> {
         return if (file.isDirectory) {
-            // Apparently the isDirectory check above isn't enough to ensure that we're dealing with directories here,
-            // which is why listFiles() can still return null in some cases
+            // Some directories can't be listed and will return null
             file.listFiles()?.let { arrayOfFiles ->
                 arrayOfFiles.sortWith(comparator = compareBy({ !it.isDirectory }, { it.name }))
                 arrayOfFiles.map { FileSystemNode(it) }
@@ -60,8 +61,10 @@ val ICON_SIZE = 24.dp
 fun NodeEntry(node: Node, indentation: Int = 0, modifier: Modifier = Modifier) {
     var isExpanded by remember { mutableStateOf(false) }
     val children by produceState<List<Node>?>(null, node) {
-        // Done asynchronously to avoid freezes with lots of files in a directory
-        value = node.listChildren()
+        withContext(Dispatchers.IO) {
+            // Done asynchronously to avoid freezes with lots of files in a directory
+            value = node.listChildren()
+        }
     }
 
     Column(modifier) {
