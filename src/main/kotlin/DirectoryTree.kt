@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -78,7 +79,12 @@ fun NodeEntry(node: Node, selectionState: MutableState<Node?>, indentation: Int 
             } else {
                 Spacer(Modifier.size(ICON_SIZE))
             }
-            Text(node.label, color = if (isSelected) MaterialTheme.colors.onSecondary else Color.Unspecified)
+            Text(
+                node.label,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                color = if (isSelected) MaterialTheme.colors.onSecondary else Color.Unspecified
+            )
         }
         if (isExpanded) {
             children?.forEach {
