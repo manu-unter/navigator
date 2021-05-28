@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-@ExperimentalFoundationApi
 @Composable
 fun DirectoryTree(
     rootNode: Node,
@@ -36,7 +35,6 @@ fun DirectoryTree(
 
 val ICON_SIZE = 24.dp
 
-@ExperimentalFoundationApi
 @Composable
 fun NodeEntry(node: Node, selectionState: MutableState<Node?>, indentation: Int = 0, modifier: Modifier = Modifier) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -88,7 +86,6 @@ fun NodeEntry(node: Node, selectionState: MutableState<Node?>, indentation: Int 
         }
     }
 }
-
 
 @Composable
 fun NodeIcon(imageVector: ImageVector, contentDescription: String, modifier: Modifier = Modifier) {

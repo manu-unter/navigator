@@ -1,12 +1,10 @@
 import androidx.compose.desktop.Window
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TextField
 import androidx.compose.runtime.*
 import java.io.File
 
-@ExperimentalFoundationApi
 fun main() = Window {
     var rootPath by remember { mutableStateOf("C:\\Users\\mane\\Downloads") }
     val rootNode by derivedStateOf { FileSystemNode(File(rootPath)) }
