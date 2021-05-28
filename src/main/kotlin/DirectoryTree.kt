@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import model.Node
 
 @Composable
 fun DirectoryTree(
@@ -39,7 +40,7 @@ val ICON_SIZE = 24.dp
 fun NodeEntry(node: Node, selectionState: MutableState<Node?>, indentation: Int = 0, modifier: Modifier = Modifier) {
     var isExpanded by remember { mutableStateOf(false) }
     val isSelected = selectionState.value === node
-    val children by produceState<List<Node>?>(null, node) {
+    val children by produceState<List<Node>?>(initialValue = null, node) {
         withContext(Dispatchers.IO) {
             // Done asynchronously to avoid freezes with lots of files in a directory
             value = node.listChildren()

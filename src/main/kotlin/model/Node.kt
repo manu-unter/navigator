@@ -1,3 +1,5 @@
+package model
+
 import java.io.File
 
 interface Node {
@@ -5,7 +7,7 @@ interface Node {
     fun listChildren(): List<Node>
 }
 
-class FileSystemNode(private val file: File) : Node {
+class FileSystemNode(val file: File) : Node {
     override val label: String get() = file.name
     override fun listChildren(): List<Node> {
         return if (file.isDirectory) {

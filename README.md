@@ -3,7 +3,7 @@ A file system navigator, written as a test assignment for JetBrains
 
 ## Functional Requirements
 - [x] Tree view of the file system
-- [ ] Preview panel on the side
+- [x] Preview panel on the side
 - [ ] Extensible tree, with capabilities to display other formats than just the file system as nodes - e.g. zip files
 - [ ] TBD: Icons?
 - [ ] Keyboard Navigation & Accessibility
