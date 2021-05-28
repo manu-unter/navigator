@@ -15,6 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
+@ExperimentalFoundationApi
 fun main() = Window {
     var path by remember { mutableStateOf("C:\\Users\\mane\\Downloads") }
 
@@ -59,6 +60,7 @@ class FileSystemNode(private val file: File) : Node {
 
 val ICON_SIZE = 24.dp
 
+@ExperimentalFoundationApi
 @Composable
 fun NodeEntry(node: Node, selectionState: MutableState<Node?>, indentation: Int = 0, modifier: Modifier = Modifier) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -74,7 +76,12 @@ fun NodeEntry(node: Node, selectionState: MutableState<Node?>, indentation: Int 
         Row(
             Modifier.fillMaxWidth()
                 .background(color = if (isSelected) MaterialTheme.colors.secondary else Color.Transparent)
-                .selectable(selected = isSelected) { selectionState.value = node }) {
+                .selectable(selected = isSelected, onClick = { selectionState.value = node })
+                .combinedClickable(
+                    onDoubleClick = { isExpanded = !isExpanded },
+                    onClick = { selectionState.value = node }
+                )
+        ) {
             Spacer(Modifier.width(ICON_SIZE * indentation))
             if (children != null && children!!.count() > 0) {
                 if (isExpanded) {
@@ -93,7 +100,7 @@ fun NodeEntry(node: Node, selectionState: MutableState<Node?>, indentation: Int 
             } else {
                 Spacer(Modifier.size(ICON_SIZE))
             }
-            Text(node.label)
+            Text(node.label, color = if (isSelected) MaterialTheme.colors.onSecondary else Color.Unspecified)
         }
         if (isExpanded) {
             children?.forEach {
