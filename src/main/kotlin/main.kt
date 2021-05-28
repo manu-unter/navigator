@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -76,10 +77,13 @@ fun NodeEntry(node: Node, selectionState: MutableState<Node?>, indentation: Int 
         Row(
             Modifier.fillMaxWidth()
                 .background(color = if (isSelected) MaterialTheme.colors.secondary else Color.Transparent)
-                .selectable(selected = isSelected, onClick = { selectionState.value = node })
-                .combinedClickable(
+                .selectable(
+                    selected = isSelected,
+                    onClick = {/* overwritten below */}
+                )
+                .sequentiallyDoubleClickable(
+                    onClick = { selectionState.value = node },
                     onDoubleClick = { isExpanded = !isExpanded },
-                    onClick = { selectionState.value = node }
                 )
         ) {
             Spacer(Modifier.width(ICON_SIZE * indentation))
@@ -106,6 +110,38 @@ fun NodeEntry(node: Node, selectionState: MutableState<Node?>, indentation: Int 
             children?.forEach {
                 NodeEntry(it, selectionState, indentation = indentation + 1)
             }
+        }
+    }
+}
+
+/**
+ * Makes the component both single- and double-clickable by *immediately* calling `onClick` on the first click and
+ * *then* `onDoubleClick` when a second click comes in. Use this modifier to avoid the delay that the standard
+ * `Modifier.combinedClickable` introduces when both an `onClick` and an `onDoubleClick` handler are given.
+ *
+ * We need to handle the double clicks in userland until the issue has been addressed in the Compose standard library.
+ *
+ * See https://github.com/JetBrains/compose-jb/issues/255 and https://issuetracker.google.com/issues/177929160
+ */
+@Composable
+fun Modifier.sequentiallyDoubleClickable(onClick: () -> Unit, onDoubleClick: () -> Unit): Modifier {
+    val doubleTapMinTimeMillis = LocalViewConfiguration.current.doubleTapMinTimeMillis
+    val doubleTapTimeoutMillis = LocalViewConfiguration.current.doubleTapTimeoutMillis
+    var lastClickTimeMillis: Long? by remember { mutableStateOf(null) }
+
+    return clickable {
+        val isDoubleClick =
+            lastClickTimeMillis?.let {
+                val millisSinceLastClick = System.currentTimeMillis() - it
+                millisSinceLastClick in doubleTapMinTimeMillis until doubleTapTimeoutMillis
+            } ?: false
+
+        if (isDoubleClick) {
+            lastClickTimeMillis = null
+            onDoubleClick()
+        } else {
+            lastClickTimeMillis = System.currentTimeMillis()
+            onClick()
         }
     }
 }
