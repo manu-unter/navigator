@@ -5,28 +5,31 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.loadSvgResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import model.FileSystemNode
-import model.Node
+import model.*
 import org.jetbrains.skija.Image
-import java.io.File
-import java.net.URLConnection
 
 @Composable
 fun Preview(node: Node?, modifier: Modifier = Modifier) {
     Box(modifier.padding(12.dp), Alignment.Center) {
-        if (node != null && node is FileSystemNode && node.file.isFile) {
-            val contentType = URLConnection.guessContentTypeFromName(node.file.name)
-            val mediaType = contentType?.split("/")?.get(0)
-            when (mediaType) {
-                "text" -> TextPreview(node.file)
-                "image" -> ImagePreview(node.file)
-                else -> Text("No preview available for this file type")
+        if (node != null) {
+            if (node is ContentReadable) {
+                @Suppress("BlockingMethodInNonBlockingContext")
+                when (node.contentType.split("/")[0]) {
+                    "text" -> TextPreview(node)
+                    "image" -> ImagePreview(node)
+                    else -> Text("No preview available for this file type")
+                }
+            } else {
+                Text("No preview available for this file type")
             }
         } else {
             Text("Select a file to see a preview")
@@ -36,26 +39,36 @@ fun Preview(node: Node?, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun TextPreview(file: File) {
-    val contentPreview by produceState<String?>(initialValue = null, file) {
+private fun TextPreview(contentReadable: ContentReadable) {
+    val previewText by produceState<String?>(initialValue = null, contentReadable) {
         withContext(Dispatchers.IO) {
-            value = file.readText()
+            value = contentReadable.contentInputStream().reader().readText()
         }
     }
 
-    contentPreview?.let {
+    previewText?.let {
         Text(it, fontFamily = FontFamily.Monospace)
     }
 }
 
 @Composable
-fun ImagePreview(file: File) {
-    val imagePreview by produceState<ImageBitmap?>(initialValue = null, file) {
+private fun ImagePreview(contentReadable: ContentReadable) {
+    val localDensity = LocalDensity.current
+    val imagePreviewPainter by produceState<Painter?>(initialValue = null, contentReadable, localDensity) {
         withContext(Dispatchers.IO) {
-            value = Image.makeFromEncoded(file.readBytes()).asImageBitmap()
+            val contentInputStream = contentReadable.contentInputStream()
+
+            @Suppress("BlockingMethodInNonBlockingContext")
+            value = when (contentReadable.contentType) {
+                "image/svg" -> loadSvgResource(contentInputStream, localDensity)
+                else -> BitmapPainter(
+                    Image.makeFromEncoded(contentInputStream.readAllBytes()).asImageBitmap()
+                )
+            }
         }
     }
-    imagePreview?.let {
-        Image(bitmap = it, contentDescription = "Image preview")
+
+    imagePreviewPainter?.let {
+        Image(painter = it, contentDescription = "Image preview")
     }
 }
