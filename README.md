@@ -35,7 +35,8 @@ The navigator is designed to be easily extensible with new file formats in two w
 
 ### Making New Archive File Formats Expandable
 
-To make a new archive file format, e.g. `*.zip` files, expandable, you need to:
+To make a new archive file format, e.g. `*.zip` files, expandable, you need to
+extend [Node.kt](src/main/kotlin/model/Node.kt) in the following ways:
 
 #### 1. Teach the `Node(file)` factory to treat the archive files differently - e.g. `"application/zip" -> ZipArchive(file)`
 
@@ -82,7 +83,7 @@ the `ContentReadable` interface and add the required methods.
 
 ### Adding previews for new file types
 
-To display previews for new file types, you need to do two things:
+To display previews for new file types, you need to do two things inside [Preview.kt](src/main/kotlin/Preview.kt):
 
 1. Extend the `when` clause in the `Preview` component - e.g. `"video" -> VideoPreview(node)`
 2. Implement the new preview component which shows the file content (e.g. the `VideoPreview` component itself) - you can
