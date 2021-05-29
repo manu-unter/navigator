@@ -37,7 +37,7 @@ private class FileSystemDirectory(val file: File) : Node, Expandable {
 
     init {
         if (!file.isDirectory) {
-            throw Exception("Cannot create a DirectoryNode for a File which doesn't represent a directory")
+            throw Exception("Cannot create a FileSystemDirectory Node for a File which doesn't represent a directory")
         }
     }
 
@@ -56,7 +56,7 @@ private open class FileSystemFile(val file: File) : Node {
 
     init {
         if (file.isDirectory) {
-            throw Exception("Cannot create a FileNode for a File which represents a directory")
+            throw Exception("Cannot create a FileSystemFile Node for a File which represents a directory")
         }
     }
 }
