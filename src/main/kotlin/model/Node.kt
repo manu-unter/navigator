@@ -7,7 +7,6 @@ import java.net.URLConnection
 
 interface Node {
     val label: String
-    fun listChildren(): List<Node>
 }
 
 fun Node(file: File): Node {
@@ -18,10 +17,14 @@ fun Node(file: File): Node {
     // Extend this with a mapping for other node types, e.g. zip files, and add a corresponding subclass of
     // FileSystemNode which lists its children
     return when {
-        file.isDirectory -> DirectoryNode(file)
-        contentType != null -> ContentReadableFileLeafNode(file, contentType)
-        else -> FileLeafNode(file)
+        file.isDirectory -> FileSystemDirectory(file)
+        contentType != null -> ContentReadableFileSystemFile(file, contentType)
+        else -> FileSystemFile(file)
     }
+}
+
+interface Expandable {
+    fun listChildren(): List<Node>
 }
 
 interface ContentReadable {
@@ -29,11 +32,9 @@ interface ContentReadable {
     fun contentInputStream(): InputStream
 }
 
-private abstract class FileSystemNode(val file: File) : Node {
-    override val label: String get() = file.name
-}
+private class FileSystemDirectory(val file: File) : Node, Expandable {
+    override val label: String = file.name
 
-private class DirectoryNode(file: File) : FileSystemNode(file) {
     init {
         if (!file.isDirectory) {
             throw Exception("Cannot create a DirectoryNode for a File which doesn't represent a directory")
@@ -50,19 +51,17 @@ private class DirectoryNode(file: File) : FileSystemNode(file) {
     }
 }
 
-private open class FileLeafNode(file: File) : FileSystemNode(file) {
+private open class FileSystemFile(val file: File) : Node {
+    override val label: String = file.name
+
     init {
         if (file.isDirectory) {
             throw Exception("Cannot create a FileNode for a File which represents a directory")
         }
     }
-
-    override fun listChildren(): List<Node> {
-        return emptyList()
-    }
 }
 
-private class ContentReadableFileLeafNode(file: File, override val contentType: String) : FileLeafNode(file),
+private class ContentReadableFileSystemFile(file: File, override val contentType: String) : FileSystemFile(file),
     ContentReadable {
     override fun contentInputStream(): InputStream {
         return file.inputStream()

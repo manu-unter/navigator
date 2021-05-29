@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import model.Expandable
 import model.Node
 
 @Composable
@@ -42,9 +43,11 @@ private fun NodeEntry(node: Node, selectionState: MutableState<Node?>, indentati
     var isExpanded by remember { mutableStateOf(false) }
     val isSelected = selectionState.value === node
     val children by produceState<List<Node>?>(initialValue = null, node) {
-        withContext(Dispatchers.IO) {
-            // Done asynchronously to avoid freezes with lots of files in a directory
-            value = node.listChildren()
+        if (node is Expandable) {
+            withContext(Dispatchers.IO) {
+                // Done asynchronously to avoid freezes with lots of files in a directory
+                value = node.listChildren()
+            }
         }
     }
 
