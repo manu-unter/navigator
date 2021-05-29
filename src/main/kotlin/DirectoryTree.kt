@@ -38,7 +38,7 @@ fun DirectoryTree(
 val ICON_SIZE = 24.dp
 
 @Composable
-fun NodeEntry(node: Node, selectionState: MutableState<Node?>, indentation: Int = 0, modifier: Modifier = Modifier) {
+private fun NodeEntry(node: Node, selectionState: MutableState<Node?>, indentation: Int = 0, modifier: Modifier = Modifier) {
     var isExpanded by remember { mutableStateOf(false) }
     val isSelected = selectionState.value === node
     val children by produceState<List<Node>?>(initialValue = null, node) {
@@ -95,6 +95,6 @@ fun NodeEntry(node: Node, selectionState: MutableState<Node?>, indentation: Int 
 }
 
 @Composable
-fun NodeIcon(imageVector: ImageVector, contentDescription: String, modifier: Modifier = Modifier) {
+private fun NodeIcon(imageVector: ImageVector, contentDescription: String, modifier: Modifier = Modifier) {
     Icon(imageVector, contentDescription, modifier.size(ICON_SIZE))
 }
