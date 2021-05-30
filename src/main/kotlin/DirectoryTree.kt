@@ -56,7 +56,7 @@ fun DirectoryTree(
                 on(Key.Escape) { selectionState.value = null }
             }) {
         Column(Modifier.verticalScroll(scrollState)) {
-            NodeEntry(rootNode, selectionState, focusRequester)
+            NodeEntry(rootNode, selectionState, isFocused, focusRequester)
         }
         VerticalScrollbar(scrollbarAdapter, Modifier.align(Alignment.CenterEnd))
     }
@@ -68,6 +68,7 @@ val ICON_SIZE = 24.dp
 private fun NodeEntry(
     node: Node,
     selectionState: MutableState<Node?>,
+    isFocused: Boolean,
     focusRequester: FocusRequester,
     indentation: Int = 0,
     modifier: Modifier = Modifier
@@ -84,7 +85,13 @@ private fun NodeEntry(
     }
 
     Column(modifier.fillMaxWidth()) {
-        Surface(color = if (isSelected) MaterialTheme.colors.primary else Color.Transparent) {
+        Surface(
+            color =
+            if (isSelected)
+                if (isFocused) MaterialTheme.colors.primary
+                else LocalContentColor.current.copy(alpha = 0.12f)
+            else Color.Transparent
+        ) {
             Row(
                 Modifier.fillMaxWidth()
                     .selectable(
@@ -126,7 +133,7 @@ private fun NodeEntry(
         }
         if (isExpanded) {
             children?.forEach {
-                NodeEntry(it, selectionState, focusRequester, indentation = indentation + 1)
+                NodeEntry(it, selectionState, isFocused, focusRequester, indentation = indentation + 1)
             }
         }
     }
