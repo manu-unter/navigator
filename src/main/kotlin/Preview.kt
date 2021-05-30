@@ -60,7 +60,7 @@ private fun ImagePreview(contentReadable: ContentReadable) {
 
             @Suppress("BlockingMethodInNonBlockingContext")
             value = when (contentReadable.contentType) {
-                "image/svg" -> loadSvgResource(contentInputStream, localDensity)
+                "image/svg+xml" -> loadSvgResource(contentInputStream, localDensity)
                 else -> BitmapPainter(
                     Image.makeFromEncoded(contentInputStream.readAllBytes()).asImageBitmap()
                 )
