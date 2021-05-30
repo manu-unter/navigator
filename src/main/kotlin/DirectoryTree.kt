@@ -3,9 +3,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowRight
@@ -47,7 +45,7 @@ fun DirectoryTree(
                     Modifier.border(
                         width = Dp.Hairline,
                         color = MaterialTheme.colors.primary,
-                        shape = MaterialTheme.shapes.small
+                        shape = MaterialTheme.shapes.large,
                     )
                 else
                     Modifier
@@ -86,45 +84,45 @@ private fun NodeEntry(
     }
 
     Column(modifier.fillMaxWidth()) {
-        Row(
-            Modifier.fillMaxWidth()
-                .background(color = if (isSelected) MaterialTheme.colors.secondary else Color.Transparent)
-                .selectable(
-                    selected = isSelected,
-                    onClick = {/* overwritten below */ }
-                )
-                .sequentiallyDoubleClickable(
-                    onClick = {
-                        focusRequester.requestFocus()
-                        selectionState.value = node
-                    },
-                    onDoubleClick = { isExpanded = !isExpanded },
-                )
-        ) {
-            Spacer(Modifier.width(ICON_SIZE * indentation))
-            if (children != null && children!!.count() > 0) {
-                if (isExpanded) {
-                    NodeIcon(
-                        Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Collapse",
-                        Modifier.clickable { isExpanded = false }
+        Surface(color = if (isSelected) MaterialTheme.colors.primary else Color.Transparent) {
+            Row(
+                Modifier.fillMaxWidth()
+                    .selectable(
+                        selected = isSelected,
+                        onClick = {/* overwritten below */ }
                     )
+                    .sequentiallyDoubleClickable(
+                        onClick = {
+                            focusRequester.requestFocus()
+                            selectionState.value = node
+                        },
+                        onDoubleClick = { isExpanded = !isExpanded },
+                    )
+            ) {
+                Spacer(Modifier.width(ICON_SIZE * indentation))
+                if (children != null && children!!.count() > 0) {
+                    if (isExpanded) {
+                        NodeIcon(
+                            Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Collapse",
+                            Modifier.clickable { isExpanded = false }
+                        )
+                    } else {
+                        NodeIcon(
+                            Icons.Default.KeyboardArrowRight,
+                            contentDescription = "Expand",
+                            Modifier.clickable { isExpanded = true }
+                        )
+                    }
                 } else {
-                    NodeIcon(
-                        Icons.Default.KeyboardArrowRight,
-                        contentDescription = "Expand",
-                        Modifier.clickable { isExpanded = true }
-                    )
+                    Spacer(Modifier.size(ICON_SIZE))
                 }
-            } else {
-                Spacer(Modifier.size(ICON_SIZE))
+                Text(
+                    node.label,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
-            Text(
-                node.label,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = if (isSelected) MaterialTheme.colors.onSecondary else Color.Unspecified
-            )
         }
         if (isExpanded) {
             children?.forEach {
@@ -136,5 +134,9 @@ private fun NodeEntry(
 
 @Composable
 private fun NodeIcon(imageVector: ImageVector, contentDescription: String, modifier: Modifier = Modifier) {
-    Icon(imageVector, contentDescription, modifier.size(ICON_SIZE))
+    Icon(
+        imageVector,
+        contentDescription,
+        modifier = modifier.size(ICON_SIZE)
+    )
 }

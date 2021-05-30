@@ -1,6 +1,8 @@
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,23 +21,26 @@ import org.jetbrains.skija.Image
 
 @Composable
 fun Preview(node: Node?, modifier: Modifier = Modifier) {
-    Box(modifier.padding(12.dp), Alignment.Center) {
-        if (node != null) {
-            if (node is ContentReadable) {
-                @Suppress("BlockingMethodInNonBlockingContext")
-                when (node.contentType.split("/")[0]) {
-                    "text" -> TextPreview(node)
-                    "image" -> ImagePreview(node)
-                    else -> Text("No preview available for this file type")
+    Surface(color = MaterialTheme.colors.background, modifier = modifier) {
+        Box(
+            Modifier.padding(12.dp), Alignment.Center
+        ) {
+            if (node != null) {
+                if (node is ContentReadable) {
+                    @Suppress("BlockingMethodInNonBlockingContext")
+                    when (node.contentType.split("/")[0]) {
+                        "text" -> TextPreview(node)
+                        "image" -> ImagePreview(node)
+                        else -> Text("No preview available for this file type")
+                    }
+                } else {
+                    Text("No preview available for this file type")
                 }
             } else {
-                Text("No preview available for this file type")
+                Text("Select a file to see a preview")
             }
-        } else {
-            Text("Select a file to see a preview")
         }
     }
-
 }
 
 @Composable
