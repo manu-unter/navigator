@@ -3,6 +3,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -88,7 +89,7 @@ private fun NodeEntry(
         Surface(
             color =
             if (isSelected)
-                if (isFocused) MaterialTheme.colors.primary
+                if (isFocused) LocalTextSelectionColors.current.backgroundColor
                 else LocalContentColor.current.copy(alpha = 0.12f)
             else Color.Transparent
         ) {
