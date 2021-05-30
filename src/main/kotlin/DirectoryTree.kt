@@ -1,3 +1,5 @@
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
@@ -17,7 +19,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.shortcuts
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -37,6 +38,11 @@ fun DirectoryTree(
 
     val isFocused by mutableInteractionSource.collectIsFocusedAsState()
 
+    val borderWidth by animateDpAsState(
+        if (isFocused) 2.dp else 1.dp,
+        tween(durationMillis = 150)
+    )
+
     Box(
         modifier = modifier
             .focusRequester(focusRequester)
@@ -44,13 +50,12 @@ fun DirectoryTree(
             .then(
                 if (isFocused)
                     Modifier.border(
-                        width = Dp.Hairline,
+                        width = borderWidth,
                         color = MaterialTheme.colors.primary,
                         shape = MaterialTheme.shapes.large,
                     )
                 else
                     Modifier
-
             )
             .clickable { focusRequester.requestFocus() }
             .shortcuts {
