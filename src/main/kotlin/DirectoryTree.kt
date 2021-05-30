@@ -1,4 +1,6 @@
 import androidx.compose.foundation.*
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.Icon
@@ -10,9 +12,13 @@ import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.shortcuts
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -27,10 +33,32 @@ fun DirectoryTree(
 ) {
     val scrollState = rememberScrollState()
     val scrollbarAdapter = rememberScrollbarAdapter(scrollState)
+    val mutableInteractionSource = remember { MutableInteractionSource() }
+    val focusRequester = FocusRequester()
 
-    Box(modifier = modifier) {
+    val isFocused by mutableInteractionSource.collectIsFocusedAsState()
+
+    Box(
+        modifier = modifier
+            .focusRequester(focusRequester)
+            .focusable(interactionSource = mutableInteractionSource)
+            .then(
+                if (isFocused)
+                    Modifier.border(
+                        width = Dp.Hairline,
+                        color = MaterialTheme.colors.primary,
+                        shape = MaterialTheme.shapes.small
+                    )
+                else
+                    Modifier
+
+            )
+            .clickable { focusRequester.requestFocus() }
+            .shortcuts {
+                on(Key.Escape) { selectionState.value = null }
+            }) {
         Column(Modifier.verticalScroll(scrollState)) {
-            NodeEntry(rootNode, selectionState)
+            NodeEntry(rootNode, selectionState, focusRequester)
         }
         VerticalScrollbar(scrollbarAdapter, Modifier.align(Alignment.CenterEnd))
     }
@@ -39,7 +67,13 @@ fun DirectoryTree(
 val ICON_SIZE = 24.dp
 
 @Composable
-private fun NodeEntry(node: Node, selectionState: MutableState<Node?>, indentation: Int = 0, modifier: Modifier = Modifier) {
+private fun NodeEntry(
+    node: Node,
+    selectionState: MutableState<Node?>,
+    focusRequester: FocusRequester,
+    indentation: Int = 0,
+    modifier: Modifier = Modifier
+) {
     var isExpanded by remember { mutableStateOf(false) }
     val isSelected = selectionState.value === node
     val children by produceState<List<Node>?>(initialValue = null, node) {
@@ -57,10 +91,13 @@ private fun NodeEntry(node: Node, selectionState: MutableState<Node?>, indentati
                 .background(color = if (isSelected) MaterialTheme.colors.secondary else Color.Transparent)
                 .selectable(
                     selected = isSelected,
-                    onClick = {/* overwritten below */}
+                    onClick = {/* overwritten below */ }
                 )
                 .sequentiallyDoubleClickable(
-                    onClick = { selectionState.value = node },
+                    onClick = {
+                        focusRequester.requestFocus()
+                        selectionState.value = node
+                    },
                     onDoubleClick = { isExpanded = !isExpanded },
                 )
         ) {
@@ -91,7 +128,7 @@ private fun NodeEntry(node: Node, selectionState: MutableState<Node?>, indentati
         }
         if (isExpanded) {
             children?.forEach {
-                NodeEntry(it, selectionState, indentation = indentation + 1)
+                NodeEntry(it, selectionState, focusRequester, indentation = indentation + 1)
             }
         }
     }
