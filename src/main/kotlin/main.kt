@@ -1,3 +1,4 @@
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.desktop.Window
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -9,6 +10,7 @@ import androidx.compose.ui.Modifier
 import model.Node
 import java.io.File
 
+@ExperimentalAnimationApi
 fun main() = Window(title = "Navigator") {
     var rootPath by remember { mutableStateOf("C:\\Users\\mane\\Downloads") }
     val rootNode by derivedStateOf { Node(File(rootPath)) }

@@ -1,3 +1,4 @@
+import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
@@ -25,6 +26,7 @@ import kotlinx.coroutines.withContext
 import model.Expandable
 import model.Node
 
+@ExperimentalAnimationApi
 @Composable
 fun DirectoryTree(
     rootNode: Node,
@@ -70,6 +72,7 @@ fun DirectoryTree(
 
 val ICON_SIZE = 24.dp
 
+@ExperimentalAnimationApi
 @Composable
 private fun NodeEntry(
     node: Node,
@@ -137,8 +140,12 @@ private fun NodeEntry(
                 )
             }
         }
-        if (isExpanded) {
-            children?.forEach {
+        children?.forEach {
+            AnimatedVisibility(
+                isExpanded,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+            ) {
                 NodeEntry(it, selectionState, isFocused, focusRequester, indentation = indentation + 1)
             }
         }
