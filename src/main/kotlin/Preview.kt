@@ -1,5 +1,8 @@
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -17,32 +20,32 @@ import kotlinx.coroutines.withContext
 import model.*
 import org.jetbrains.skija.Image
 
+@ExperimentalAnimationApi
 @Composable
 fun Preview(node: Node?, modifier: Modifier = Modifier) {
-    Surface(color = MaterialTheme.colors.background, modifier = modifier) {
-        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-            Box(
-                Modifier.padding(12.dp), Alignment.Center
-            ) {
-                if (node != null) {
-                    if (node is ContentReadable) {
+    Surface(color = MaterialTheme.colors.background, modifier = modifier.padding(12.dp)) {
+        Crossfade(targetState = node, animationSpec = tween(150), modifier = Modifier.fillMaxSize()) {
+            Box(Modifier.fillMaxSize(), Alignment.Center) {
+                if (it != null) {
+                    if (it is ContentReadable) {
                         @Suppress("BlockingMethodInNonBlockingContext")
-                        when (node.contentType.split("/")[0]) {
-                            "text" -> TextPreview(node)
-                            "image" -> ImagePreview(node)
-                            else -> Text("No preview available for this file type")
+                        when (it.contentType.split("/")[0]) {
+                            "text" -> TextPreview(it)
+                            "image" -> ImagePreview(it)
+                            else -> DimmedMessage("No preview available for this file type")
                         }
                     } else {
-                        Text("No preview available for this file type")
+                        DimmedMessage("No preview available for this file type")
                     }
                 } else {
-                    Text("Select a file to see a preview")
+                    DimmedMessage("Select a file to see a preview")
                 }
             }
         }
     }
 }
 
+@ExperimentalAnimationApi
 @Composable
 private fun TextPreview(contentReadable: ContentReadable) {
     val previewText by produceState<String?>(initialValue = null, contentReadable) {
@@ -51,11 +54,15 @@ private fun TextPreview(contentReadable: ContentReadable) {
         }
     }
 
-    previewText?.let {
-        Text(it, fontFamily = FontFamily.Monospace)
+    AnimatedVisibility(
+        visible = previewText != null,
+        enter = fadeIn() + slideInHorizontally(initialOffsetX = { -it / 8 })
+    ) {
+        Text(previewText!!, fontFamily = FontFamily.Monospace)
     }
 }
 
+@ExperimentalAnimationApi
 @Composable
 private fun ImagePreview(contentReadable: ContentReadable) {
     val localDensity = LocalDensity.current
@@ -72,8 +79,17 @@ private fun ImagePreview(contentReadable: ContentReadable) {
             }
         }
     }
+    AnimatedVisibility(
+        visible = imagePreviewPainter != null,
+        enter = fadeIn() + slideInHorizontally(initialOffsetX = { -it / 8 }),
+    ) {
+        Image(painter = imagePreviewPainter!!, contentDescription = "Image preview")
+    }
+}
 
-    imagePreviewPainter?.let {
-        Image(painter = it, contentDescription = "Image preview")
+@Composable
+private fun DimmedMessage(message: String) {
+    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+        Text(message)
     }
 }

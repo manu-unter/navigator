@@ -16,9 +16,9 @@ A file system navigator, written as a test assignment for JetBrains
 
 - [ ] Polished and consistent UI with carefully designed:
     - [ ] spacing
-    - [ ] animations
+    - [x] animations
     - [ ] typography
-    - [ ] colors
+    - [x] colors
 - [ ] TBD: Performance? How many nodes can it display before stuttering? Virtualization? Lazy loading?
 
   I'll start without any of that and see how far that will get me
