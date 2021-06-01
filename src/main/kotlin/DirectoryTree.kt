@@ -5,6 +5,8 @@ import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.*
@@ -29,12 +31,12 @@ import model.Node
 @ExperimentalAnimationApi
 @Composable
 fun DirectoryTree(
-    rootNode: Node,
-    selectionState: MutableState<Node?> = remember { mutableStateOf<Node?>(null) },
+    rootViewNode: ViewNode,
+    selectionState: MutableState<ViewNode?> = remember { mutableStateOf<ViewNode?>(null) },
     modifier: Modifier = Modifier
 ) {
-    val scrollState = rememberScrollState()
-    val scrollbarAdapter = rememberScrollbarAdapter(scrollState)
+    val lazyListState = rememberLazyListState()
+    val scrollbarAdapter = rememberScrollbarAdapter(lazyListState)
     val mutableInteractionSource = remember { MutableInteractionSource() }
     val focusRequester = FocusRequester()
 
@@ -44,6 +46,8 @@ fun DirectoryTree(
         if (isFocused) 2.dp else 1.dp,
         tween(durationMillis = 150)
     )
+
+    val listOfViewNodes by remember(rootViewNode) { derivedStateOf { rootViewNode.listExpandedNodesDepthFirst() } }
 
     Box(
         modifier = modifier
@@ -63,33 +67,87 @@ fun DirectoryTree(
             .shortcuts {
                 on(Key.Escape) { selectionState.value = null }
             }) {
-        Column(Modifier.verticalScroll(scrollState)) {
-            NodeEntry(rootNode, selectionState, isFocused, focusRequester)
+
+        LazyColumn(state = lazyListState) {
+            items(count = listOfViewNodes.size) { index ->
+                val viewNode = listOfViewNodes[index]
+                NodeEntry(
+                    viewNode,
+                    isSelected = selectionState.value === viewNode,
+                    onSelect = {
+                        focusRequester.requestFocus()
+                        selectionState.value = viewNode
+                    },
+                    isFocused = isFocused
+                )
+            }
         }
         VerticalScrollbar(scrollbarAdapter, Modifier.align(Alignment.CenterEnd))
     }
+
 }
+
+/**
+ * View-oriented data structure which enables several features:
+ *  - Remembering if a node is expanded or not, even if it isn't currently listed in the tree
+ *  - Lazily reading and remembering directory and archive contents from the file system only for visible nodes
+ *  - Returning a depth-first listing of all nodes to flatten the tree into a List<ViewNode>, which facilitates using
+ *    it with a LazyColumn
+ */
+class ViewNode(
+    val node: Node,
+    val parent: ViewNode? = null,
+    val level: Int = 0
+) {
+
+    var isExpanded by mutableStateOf(node is Expandable && level == 0)
+
+    private var children by mutableStateOf<List<ViewNode>?>(
+        if (node is Expandable) null else emptyList()
+    )
+
+    fun hasChildren(): Boolean {
+        return children?.isNotEmpty() ?: false
+    }
+
+    fun initChildren() {
+        if (node is Expandable && children == null) {
+            val childNodes = node.listChildren()
+            children = childNodes.map {
+                ViewNode(
+                    node = it,
+                    parent = this@ViewNode,
+                    level = level + 1
+                )
+            }
+        }
+    }
+
+    fun listExpandedNodesDepthFirst(): List<ViewNode> {
+        val listOfViewNodes = mutableListOf(this)
+        if (isExpanded) {
+            children?.forEach {
+                listOfViewNodes += it.listExpandedNodesDepthFirst()
+            }
+        }
+        return listOfViewNodes
+    }
+}
+
 
 val ICON_SIZE = 24.dp
 
-@ExperimentalAnimationApi
 @Composable
 private fun NodeEntry(
-    node: Node,
-    selectionState: MutableState<Node?>,
+    viewNode: ViewNode,
+    isSelected: Boolean,
+    onSelect: () -> Unit,
     isFocused: Boolean,
-    focusRequester: FocusRequester,
-    indentation: Int = 0,
     modifier: Modifier = Modifier
 ) {
-    var isExpanded by remember { mutableStateOf(false) }
-    val isSelected = selectionState.value === node
-    val children by produceState<List<Node>?>(initialValue = null, node) {
-        if (node is Expandable) {
-            withContext(Dispatchers.IO) {
-                // Done asynchronously to avoid freezes with lots of files in a directory
-                value = node.listChildren()
-            }
+    LaunchedEffect(viewNode) {
+        withContext(Dispatchers.IO) {
+            viewNode.initChildren()
         }
     }
 
@@ -109,44 +167,36 @@ private fun NodeEntry(
                     )
                     .sequentiallyDoubleClickable(
                         onClick = {
-                            focusRequester.requestFocus()
-                            selectionState.value = node
+                            onSelect()
                         },
-                        onDoubleClick = { isExpanded = !isExpanded },
+                        onDoubleClick = {
+                            viewNode.isExpanded = !viewNode.isExpanded
+                        },
                     )
             ) {
-                Spacer(Modifier.width(ICON_SIZE * indentation))
-                if (children != null && children!!.count() > 0) {
-                    if (isExpanded) {
+                Spacer(Modifier.width(ICON_SIZE * viewNode.level))
+                if (viewNode.hasChildren()) {
+                    if (viewNode.isExpanded) {
                         NodeIcon(
                             Icons.Default.KeyboardArrowDown,
                             contentDescription = "Collapse",
-                            Modifier.clickable { isExpanded = false }
+                            Modifier.clickable { viewNode.isExpanded = false }
                         )
                     } else {
                         NodeIcon(
                             Icons.Default.KeyboardArrowRight,
                             contentDescription = "Expand",
-                            Modifier.clickable { isExpanded = true }
+                            Modifier.clickable { viewNode.isExpanded = true }
                         )
                     }
                 } else {
                     Spacer(Modifier.size(ICON_SIZE))
                 }
                 Text(
-                    node.label,
+                    viewNode.node.label,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
-            }
-        }
-        children?.forEach {
-            AnimatedVisibility(
-                isExpanded,
-                enter = fadeIn() + expandVertically(),
-                exit = fadeOut() + shrinkVertically(),
-            ) {
-                NodeEntry(it, selectionState, isFocused, focusRequester, indentation = indentation + 1)
             }
         }
     }

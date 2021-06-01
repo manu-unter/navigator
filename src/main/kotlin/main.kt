@@ -13,8 +13,8 @@ import java.io.File
 @ExperimentalAnimationApi
 fun main() = Window(title = "Navigator") {
     var rootPath by remember { mutableStateOf("C:\\Users\\mane\\Downloads") }
-    val rootNode by derivedStateOf { Node(File(rootPath)) }
-    val selectionState = remember { mutableStateOf<Node?>(null) }
+    val rootViewNode by derivedStateOf { ViewNode(Node(File(rootPath))) }
+    val selectionState = remember { mutableStateOf<ViewNode?>(null) }
 
     ApplicationTheme {
         Row(Modifier.fillMaxSize().background(color = MaterialTheme.colors.background)) {
@@ -26,11 +26,11 @@ fun main() = Window(title = "Navigator") {
                         onValueChange = { rootPath = it },
                         modifier = Modifier.fillMaxWidth()
                     )
-                    DirectoryTree(rootNode, selectionState)
+                    DirectoryTree(rootViewNode, selectionState)
                 }
             }
             Preview(
-                selectionState.value,
+                selectionState.value?.node,
                 modifier = Modifier.fillMaxHeight().weight(2f)
             )
         }
