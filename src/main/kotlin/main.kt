@@ -14,7 +14,7 @@ import java.io.File
 fun main() = Window(title = "Navigator") {
     var rootPath by remember { mutableStateOf("C:\\Users\\mane\\Downloads") }
     val rootViewNode by derivedStateOf { ViewNode(Node(File(rootPath))) }
-    val selectionState = remember { mutableStateOf<ViewNode?>(null) }
+    val selectionState = remember { mutableStateOf<ViewNode?>(rootViewNode) }
 
     ApplicationTheme {
         Row(Modifier.fillMaxSize().background(color = MaterialTheme.colors.background)) {
