@@ -19,9 +19,17 @@ A file system navigator, written as a test assignment for JetBrains
     - [x] animations
     - [ ] typography
     - [x] colors
-- [ ] TBD: Performance? How many nodes can it display before stuttering? Virtualization? Lazy loading?
-
-  I'll start without any of that and see how far that will get me
+- [x] Performance:
+  ~~How many nodes can it display before stuttering? Virtualization? Lazy loading? I'll start without any of that and
+  see how far that will get me~~
+    - [x] Lazily reading directory/archive content for visible nodes only
+    - [x] File I/O moved into `Dispatchers.IO` with coroutines
+    - [x] Virtualized scrolling (`LazyColumn`) - A dedicated tree view model allows me to keep the loaded information
+      independently of the render result while at the same time using a flattened list of the visible nodes for emitting
+      the items in a `LazyColumn`. This enables opening of huge directories like my `C:\Windows\System32` one without
+      dropping any frames. 
+    - [ ] Scrolling performance analysis - Scrolling still lags a bit in large directories despite the `LazyColumn` - 
+      will investigate this if I still find the time
 - [ ] TBD: Test Coverage?
 
   I'll go exploratory for now and add it later if I feel like I have the time
