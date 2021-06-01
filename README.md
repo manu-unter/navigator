@@ -9,16 +9,20 @@ A file system navigator, written as a test assignment for JetBrains
 - [x] Tree view of the file system
 - [x] Preview panel on the side
 - [x] Extensible tree, with capabilities to display other formats than just the file system as nodes - e.g. zip files
-- [ ] TBD: Icons?
 - [ ] Keyboard Navigation & Accessibility
+    - [x] Arrow keys navigate the directory tree
+    - [x] Escape removes the selection
+    - [ ] Tab switches between the input field and the directory tree
+    - [ ] Optimizing the usability with a screen-reader
+- [ ] TBD: Icons?
 
 ### Non-Functional Requirements
 
 - [ ] Polished and consistent UI with carefully designed:
-    - [ ] spacing
-    - [x] animations
-    - [ ] typography
-    - [x] colors
+    - [ ] Spacing
+    - [x] Animations
+    - [ ] Typography
+    - [x] Colors
 - [x] Performance:
   ~~How many nodes can it display before stuttering? Virtualization? Lazy loading? I'll start without any of that and
   see how far that will get me~~
@@ -27,12 +31,13 @@ A file system navigator, written as a test assignment for JetBrains
     - [x] Virtualized scrolling (`LazyColumn`) - A dedicated tree view model allows me to keep the loaded information
       independently of the render result while at the same time using a flattened list of the visible nodes for emitting
       the items in a `LazyColumn`. This enables opening of huge directories like my `C:\Windows\System32` one without
-      dropping any frames. 
-    - [ ] Scrolling performance analysis - Scrolling still lags a bit in large directories despite the `LazyColumn` - 
+      dropping any frames.
+      > The `LazyColumn` [seems to keep me from using animations](https://stackoverflow.com/a/67452325/4887966) for
+      > expanding and collapsing nodes. I decided to prioritize responsiveness over animations here and went for the
+      > `LazyColumn` without animations.
+    - [ ] Scrolling performance analysis - Scrolling still lags a bit in large directories despite the `LazyColumn` -
       will investigate this if I still find the time
-- [ ] TBD: Test Coverage?
-
-  I'll go exploratory for now and add it later if I feel like I have the time
+- [ ] TBD: Test Coverage
 
 ## Extending the Functionality
 
