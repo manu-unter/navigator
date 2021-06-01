@@ -66,6 +66,31 @@ fun DirectoryTree(
             .clickable { focusRequester.requestFocus() }
             .shortcuts {
                 on(Key.Escape) { selectionState.value = null }
+                on(Key.DirectionUp) {
+                    val currentSelectionIndex = listOfViewNodes.indexOf(selectionState.value)
+                    if (currentSelectionIndex > 0) {
+                        selectionState.value = listOfViewNodes.get(listOfViewNodes.indexOf(selectionState.value) - 1)
+                    }
+                }
+                on(Key.DirectionDown) {
+                    val currentSelectionIndex = listOfViewNodes.indexOf(selectionState.value)
+                    if (currentSelectionIndex < listOfViewNodes.size - 1) {
+                        selectionState.value = listOfViewNodes.get(listOfViewNodes.indexOf(selectionState.value) + 1)
+                    }
+                }
+                on(Key.DirectionLeft) {
+                    selectionState.value?.parent?.let {
+                        selectionState.value = it
+                        it.isExpanded = false
+                    }
+                }
+                on(Key.DirectionRight) {
+                    selectionState.value?.firstChild?.let {
+                        selectionState.value!!.isExpanded = true
+                        selectionState.value = it
+
+                    }
+                }
             }) {
 
         LazyColumn(state = lazyListState) {
@@ -109,6 +134,8 @@ class ViewNode(
     fun hasChildren(): Boolean {
         return children?.isNotEmpty() ?: false
     }
+
+    val firstChild get() = if (children?.isNotEmpty() == true) children?.get(0) else null
 
     fun initChildren() {
         if (node is Expandable && children == null) {
