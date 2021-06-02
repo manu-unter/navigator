@@ -42,12 +42,16 @@ class ViewNode(
         }
     }
 
-    fun addExpandedViewNodesDepthFirst(listOfExpandedViewNodes: MutableList<ViewNode>) {
+    /**
+     * Adds this ViewNode to the given list and, if it is expanded, recursively calls this same method on its children.
+     * Entries are listed in depth-first order to conform with the required ordering for listing in a flat column.
+     */
+    fun addVisibleViewNodesDepthFirst(listOfExpandedViewNodes: MutableList<ViewNode>) {
         listOfExpandedViewNodes += this
 
         if (isExpanded) {
             children?.forEach {
-                it.addExpandedViewNodesDepthFirst(listOfExpandedViewNodes)
+                it.addVisibleViewNodesDepthFirst(listOfExpandedViewNodes)
             }
         }
     }

@@ -15,11 +15,11 @@ class NodeTest {
             .sortedWith(comparator = compareBy({ !it.isDirectory }, { it.name }))
             .map { Node(it) }
 
-        assertEquals(node.label, testFile.canonicalFile.name)
+        assertEquals(testFile.canonicalFile.name, node.label)
         if (node !is Expandable) {
             fail("A Node for a directory should be returned as Expandable")
         } else {
-            assertEquals(node.listChildren().map { it.label }, expectedChildren.map { it.label })
+            assertEquals(expectedChildren.map { it.label }, node.listChildren().map { it.label })
         }
     }
 
@@ -33,9 +33,9 @@ class NodeTest {
         if (node !is ContentReadable) {
             fail("A Node for a txt file should be returned as ContentReadable")
         } else {
-            assertEquals(node.contentType, "text/plain")
+            assertEquals("text/plain", node.contentType)
             with(node.contentInputStream().reader()) {
-                assertEquals(readText(), expectedContent)
+                assertEquals(expectedContent, readText())
                 close()
             }
         }
@@ -46,11 +46,11 @@ class NodeTest {
         val testFile = File("src/test/resources/test-image.png")
         val node = Node(testFile)
 
-        assertEquals(node.label, testFile.canonicalFile.name)
+        assertEquals(testFile.canonicalFile.name, node.label)
         if (node !is ContentReadable) {
             fail("A Node for a png file should be returned as ContentReadable")
         } else {
-            assertEquals(node.contentType, "image/png")
+            assertEquals("image/png", node.contentType)
         }
     }
 }
