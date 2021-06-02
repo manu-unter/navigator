@@ -89,6 +89,7 @@ private fun ImagePreview(contentReadable: ContentReadable) {
             contentInputStream.close()
         }
     }
+
     AnimatedVisibility(
         visible = imagePreviewPainter != null,
         enter = fadeIn() + slideInHorizontally(initialOffsetX = { -it / 8 }),
