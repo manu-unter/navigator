@@ -42,7 +42,7 @@ A file system navigator, written as a test assignment for JetBrains
     - [ ] DirectoryTree component
     - [ ] DirectoryTreeItem component
     - [x] Preview component
-    - [ ] Node model functionality
+    - [x] Node model functionality
 ## Extending the Functionality
 
 The navigator is designed to be easily extensible with new file formats in two ways:
