@@ -2,7 +2,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.material.TextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -27,7 +26,11 @@ fun main() = application {
             }
         }
 
-        var rootPath by remember { mutableStateOf("C:\\Users\\mane\\Downloads") }
+        var rootPath by remember {
+            mutableStateOf(
+                System.getProperty("user.home") ?: System.getenv("SystemDrive") ?: "/"
+            )
+        }
         val rootViewNode by derivedStateOf { ViewNode(Node(File(rootPath))) }
         val selectionState = remember { mutableStateOf<ViewNode?>(rootViewNode) }
 
