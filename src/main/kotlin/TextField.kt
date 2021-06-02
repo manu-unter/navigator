@@ -1,7 +1,6 @@
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
@@ -24,7 +23,6 @@ fun TextField(value: String, onValueChange: (value: String) -> Unit, modifier: M
         if (isFocused) 2.dp else 1.dp,
         tween(durationMillis = 150)
     )
-
 
     BasicTextField(
         value = value,

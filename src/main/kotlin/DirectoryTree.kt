@@ -1,32 +1,20 @@
-import androidx.compose.animation.*
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.text.selection.LocalTextSelectionColors
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.*
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.shortcuts
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import model.Expandable
-import model.Node
 
 @Composable
 fun DirectoryTree(
@@ -95,7 +83,7 @@ fun DirectoryTree(
         LazyColumn(state = lazyListState) {
             items(count = listOfViewNodes.size) { index ->
                 val viewNode = listOfViewNodes[index]
-                NodeEntry(
+                DirectoryTreeItem(
                     viewNode,
                     isSelected = selectionState.value === viewNode,
                     onSelect = {
@@ -109,130 +97,4 @@ fun DirectoryTree(
         VerticalScrollbar(scrollbarAdapter, Modifier.align(Alignment.CenterEnd))
     }
 
-}
-
-/**
- * View-oriented data structure which enables several features:
- *  - Remembering if a node is expanded or not, even if it isn't currently listed in the tree
- *  - Lazily reading and remembering directory and archive contents from the file system only for visible nodes
- *  - Returning a depth-first listing of all nodes to flatten the tree into a List<ViewNode>, which facilitates using
- *    it with a LazyColumn
- */
-class ViewNode(
-    val node: Node,
-    val parent: ViewNode? = null,
-    val level: Int = 0
-) {
-
-    var isExpanded by mutableStateOf(node is Expandable && level == 0)
-
-    private var children by mutableStateOf<List<ViewNode>?>(
-        if (node is Expandable) null else emptyList()
-    )
-
-    fun hasChildren(): Boolean {
-        return children?.isNotEmpty() ?: false
-    }
-
-    val firstChild get() = if (children?.isNotEmpty() == true) children?.get(0) else null
-
-    fun initChildren() {
-        if (node is Expandable && children == null) {
-            val childNodes = node.listChildren()
-            children = childNodes.map {
-                ViewNode(
-                    node = it,
-                    parent = this@ViewNode,
-                    level = level + 1
-                )
-            }
-        }
-    }
-
-    fun listExpandedNodesDepthFirst(): List<ViewNode> {
-        val listOfViewNodes = mutableListOf(this)
-        if (isExpanded) {
-            children?.forEach {
-                listOfViewNodes += it.listExpandedNodesDepthFirst()
-            }
-        }
-        return listOfViewNodes
-    }
-}
-
-
-val ICON_SIZE = 24.dp
-
-@Composable
-private fun NodeEntry(
-    viewNode: ViewNode,
-    isSelected: Boolean,
-    onSelect: () -> Unit,
-    isFocused: Boolean,
-    modifier: Modifier = Modifier
-) {
-    LaunchedEffect(viewNode) {
-        withContext(Dispatchers.IO) {
-            viewNode.initChildren()
-        }
-    }
-
-    Column(modifier.fillMaxWidth()) {
-        Surface(
-            color =
-            if (isSelected)
-                if (isFocused) LocalTextSelectionColors.current.backgroundColor
-                else LocalContentColor.current.copy(alpha = 0.12f)
-            else Color.Transparent
-        ) {
-            Row(
-                Modifier.fillMaxWidth()
-                    .selectable(
-                        selected = isSelected,
-                        onClick = {/* overwritten below */ }
-                    )
-                    .sequentiallyDoubleClickable(
-                        onClick = {
-                            onSelect()
-                        },
-                        onDoubleClick = {
-                            viewNode.isExpanded = !viewNode.isExpanded
-                        },
-                    )
-            ) {
-                Spacer(Modifier.width(ICON_SIZE * viewNode.level))
-                if (viewNode.hasChildren()) {
-                    if (viewNode.isExpanded) {
-                        NodeIcon(
-                            Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Collapse",
-                            Modifier.clickable { viewNode.isExpanded = false }
-                        )
-                    } else {
-                        NodeIcon(
-                            Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Expand",
-                            Modifier.clickable { viewNode.isExpanded = true }
-                        )
-                    }
-                } else {
-                    Spacer(Modifier.size(ICON_SIZE))
-                }
-                Text(
-                    viewNode.node.label,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun NodeIcon(imageVector: ImageVector, contentDescription: String, modifier: Modifier = Modifier) {
-    Icon(
-        imageVector,
-        contentDescription,
-        modifier = modifier.size(ICON_SIZE)
-    )
 }
