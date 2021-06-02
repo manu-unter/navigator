@@ -13,6 +13,7 @@ A file system navigator, written as a test assignment for JetBrains
     - [x] Arrow keys navigate the directory tree
     - [x] Escape removes the selection
     - [ ] Tab switches between the input field and the directory tree
+    - [ ] Keeping the selected row in the view by scrolling if necessary
     - [ ] Optimizing the usability with a screen-reader
 - [ ] TBD: Icons?
 
