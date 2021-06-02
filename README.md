@@ -20,7 +20,7 @@ A file system navigator, written as a test assignment for JetBrains
 ### Non-Functional Requirements
 
 - [ ] Polished and consistent UI with carefully designed:
-    - [ ] Spacing
+    - [x] Spacing
     - [x] Animations
     - [ ] Typography
     - [x] Colors

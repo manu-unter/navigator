@@ -39,8 +39,9 @@ fun main() = application {
                         TextField(
                             value = rootPath,
                             onValueChange = { rootPath = it },
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         )
+                        Spacer(Modifier.height(2.dp))
                         DirectoryTree(rootViewNode, selectionState)
                     }
                 }
