@@ -34,7 +34,13 @@ fun DirectoryTree(
         tween(durationMillis = 150)
     )
 
-    val listOfViewNodes by remember(rootViewNode) { derivedStateOf { rootViewNode.listExpandedNodesDepthFirst() } }
+    val listOfViewNodes by remember(rootViewNode) {
+        derivedStateOf {
+            val list = mutableListOf<ViewNode>()
+            rootViewNode.addExpandedViewNodesDepthFirst(list)
+            list
+        }
+    }
 
     Box(
         modifier = modifier

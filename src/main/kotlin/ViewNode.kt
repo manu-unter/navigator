@@ -42,13 +42,13 @@ class ViewNode(
         }
     }
 
-    fun listExpandedNodesDepthFirst(): List<ViewNode> {
-        val listOfViewNodes = mutableListOf(this)
+    fun addExpandedViewNodesDepthFirst(listOfExpandedViewNodes: MutableList<ViewNode>) {
+        listOfExpandedViewNodes += this
+
         if (isExpanded) {
             children?.forEach {
-                listOfViewNodes += it.listExpandedNodesDepthFirst()
+                it.addExpandedViewNodesDepthFirst(listOfExpandedViewNodes)
             }
         }
-        return listOfViewNodes
     }
 }
