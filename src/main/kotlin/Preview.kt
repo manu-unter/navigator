@@ -5,7 +5,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
@@ -17,7 +20,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import model.*
+import model.ContentReadable
+import model.Node
 import org.jetbrains.skija.Image
 
 @Composable
@@ -49,7 +53,11 @@ fun Preview(node: Node?, modifier: Modifier = Modifier) {
 private fun TextPreview(contentReadable: ContentReadable) {
     val previewText by produceState<String?>(initialValue = null, contentReadable) {
         withContext(Dispatchers.IO) {
-            value = contentReadable.contentInputStream().reader().readText()
+            with(contentReadable.contentInputStream().reader()) {
+                value = readText()
+                @Suppress("BlockingMethodInNonBlockingContext")
+                close()
+            }
         }
     }
 
@@ -76,6 +84,9 @@ private fun ImagePreview(contentReadable: ContentReadable) {
                     Image.makeFromEncoded(contentInputStream.readAllBytes()).asImageBitmap()
                 )
             }
+
+            @Suppress("BlockingMethodInNonBlockingContext")
+            contentInputStream.close()
         }
     }
     AnimatedVisibility(
