@@ -33,53 +33,52 @@ fun DirectoryTreeItem(
         }
     }
 
-    Column(modifier.fillMaxWidth()) {
-        Surface(
-            color =
-            if (isSelected)
-                if (isFocused) LocalTextSelectionColors.current.backgroundColor
-                else LocalContentColor.current.copy(alpha = 0.12f)
-            else Color.Transparent
-        ) {
-            Row(
-                Modifier.fillMaxWidth()
-                    .selectable(
-                        selected = isSelected,
-                        onClick = {/* overwritten below */ }
-                    )
-                    .sequentiallyDoubleClickable(
-                        onClick = {
-                            onSelect()
-                        },
-                        onDoubleClick = {
-                            viewNode.isExpanded = !viewNode.isExpanded
-                        },
-                    )
-            ) {
-                Spacer(Modifier.width(ICON_SIZE * viewNode.level))
-                if (viewNode.hasChildren()) {
-                    if (viewNode.isExpanded) {
-                        NodeIcon(
-                            Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Collapse icon",
-                            Modifier.clickable { viewNode.isExpanded = false }
-                        )
-                    } else {
-                        NodeIcon(
-                            Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Expand icon",
-                            Modifier.clickable { viewNode.isExpanded = true }
-                        )
-                    }
-                } else {
-                    Spacer(Modifier.size(ICON_SIZE))
-                }
-                Text(
-                    viewNode.node.label,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
+    Surface(
+        color =
+        if (isSelected)
+            if (isFocused) LocalTextSelectionColors.current.backgroundColor
+            else LocalContentColor.current.copy(alpha = 0.12f)
+        else Color.Transparent,
+        modifier = modifier
+    ) {
+        Row(
+            Modifier.fillMaxWidth()
+                .selectable(
+                    selected = isSelected,
+                    onClick = {/* overwritten below */ }
                 )
+                .sequentiallyDoubleClickable(
+                    onClick = {
+                        onSelect()
+                    },
+                    onDoubleClick = {
+                        viewNode.isExpanded = !viewNode.isExpanded
+                    },
+                )
+        ) {
+            Spacer(Modifier.width(ICON_SIZE * viewNode.level))
+            if (viewNode.hasChildren()) {
+                if (viewNode.isExpanded) {
+                    NodeIcon(
+                        Icons.Default.KeyboardArrowDown,
+                        contentDescription = "Collapse icon",
+                        Modifier.clickable { viewNode.isExpanded = false }
+                    )
+                } else {
+                    NodeIcon(
+                        Icons.Default.KeyboardArrowRight,
+                        contentDescription = "Expand icon",
+                        Modifier.clickable { viewNode.isExpanded = true }
+                    )
+                }
+            } else {
+                Spacer(Modifier.size(ICON_SIZE))
             }
+            Text(
+                viewNode.node.label,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }

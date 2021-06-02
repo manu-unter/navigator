@@ -40,7 +40,7 @@ A file system navigator, written as a test assignment for JetBrains
       will investigate this if I still find the time
 - [ ] Test Coverage
     - [ ] DirectoryTree component
-    - [ ] DirectoryTreeItem component
+    - [x] DirectoryTreeItem component
     - [x] Preview component
     - [x] Node
     - [x] ViewNode
