@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.5.10"
-    id("org.jetbrains.compose") version "0.4.0-build211"
+    id("org.jetbrains.compose") version "0.4.0"
 }
 
 group = "me.mane"
@@ -22,6 +22,7 @@ dependencies {
 
 tasks.withType<KotlinCompile>() {
     kotlinOptions.jvmTarget = "11"
+    kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
 }
 
 compose.desktop {

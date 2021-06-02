@@ -20,7 +20,6 @@ import kotlinx.coroutines.withContext
 import model.*
 import org.jetbrains.skija.Image
 
-@ExperimentalAnimationApi
 @Composable
 fun Preview(node: Node?, modifier: Modifier = Modifier) {
     Surface(color = MaterialTheme.colors.background, modifier = modifier.padding(12.dp)) {
@@ -45,7 +44,7 @@ fun Preview(node: Node?, modifier: Modifier = Modifier) {
     }
 }
 
-@ExperimentalAnimationApi
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun TextPreview(contentReadable: ContentReadable) {
     val previewText by produceState<String?>(initialValue = null, contentReadable) {
@@ -62,7 +61,7 @@ private fun TextPreview(contentReadable: ContentReadable) {
     }
 }
 
-@ExperimentalAnimationApi
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun ImagePreview(contentReadable: ContentReadable) {
     val localDensity = LocalDensity.current

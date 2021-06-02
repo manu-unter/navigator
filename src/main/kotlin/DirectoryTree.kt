@@ -28,7 +28,6 @@ import kotlinx.coroutines.withContext
 import model.Expandable
 import model.Node
 
-@ExperimentalAnimationApi
 @Composable
 fun DirectoryTree(
     rootViewNode: ViewNode,
