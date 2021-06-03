@@ -42,10 +42,10 @@ A file system navigator, written as a test assignment for JetBrains
     - [x] Navigator component (most are deactivated due to missing test API implementations)
     - [x] DirectoryTree component
     - [x] DirectoryTreeItem component
-    - [x] Preview component (flaky, see #4)
+    - [x] Preview component (flaky, see [#4](https://github.com/manu-unter/navigator/issues/4))
     - [x] Node
     - [x] ViewNode
-    - [x] Modifier.sequentiallyDoubleClickable (don't work, see #3)
+    - [x] Modifier.sequentiallyDoubleClickable (don't work, see [#3](https://github.com/manu-unter/navigator/issues/3))
 ## Extending the Functionality
 
 The navigator is designed to be easily extensible with new file formats in two ways:
