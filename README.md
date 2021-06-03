@@ -39,7 +39,7 @@ A file system navigator, written as a test assignment for JetBrains
     - [ ] Scrolling performance analysis - Scrolling still lags a bit in large directories despite the `LazyColumn` -
       will investigate this if I still find the time
 - [ ] Test Coverage
-    - [ ] Top-level component
+    - [x] Navigator component (most are deactivated due to missing test API implementations)
     - [x] DirectoryTree component
     - [x] DirectoryTreeItem component
     - [x] Preview component
