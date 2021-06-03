@@ -9,7 +9,6 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import model.Expandable
 import model.Node
 import org.junit.Assert.assertEquals
-import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -35,22 +34,16 @@ class DirectoryTreeTest {
             return listOf(testChildNode)
         }
     }
-    private val viewNode = ViewNode(testNode)
-    private var listOfViewNodes: List<ViewNode> = emptyList()
+    private val rootViewNode = ViewNode(testNode)
 
-    @Before
-    fun setup() {
-        viewNode.isExpanded = true
-        viewNode.initChildren()
-        val mutableListOfViewNodes = mutableListOf<ViewNode>()
-        viewNode.addVisibleViewNodesDepthFirst(mutableListOfViewNodes)
-        listOfViewNodes = mutableListOfViewNodes
+    init {
+        rootViewNode.initChildren()
     }
 
     @Test
     fun `creating a DirectoryTree from a list of ViewNodes`() {
         with(composeTestRule) {
-            setContent { DirectoryTree(listOfViewNodes, selectedViewNode = null, onSelect = {}) }
+            setContent { DirectoryTree(rootViewNode, selectedViewNode = null, onSelect = {}) }
 
             onNodeWithText(testNodeLabel).assertExists()
             onNodeWithText(testChildNodeLabel).assertExists()
@@ -61,7 +54,7 @@ class DirectoryTreeTest {
     @Test
     fun focusability() {
         with(composeTestRule) {
-            setContent { DirectoryTree(listOfViewNodes, selectedViewNode = null, onSelect = {}) }
+            setContent { DirectoryTree(rootViewNode, selectedViewNode = null, onSelect = {}) }
 
             onNode(isFocusable()).assertExists()
 
@@ -75,7 +68,7 @@ class DirectoryTreeTest {
     @Test
     fun `initial selection state`() {
         with(composeTestRule) {
-            setContent { DirectoryTree(listOfViewNodes, selectedViewNode = listOfViewNodes[0], onSelect = {}) }
+            setContent { DirectoryTree(rootViewNode, selectedViewNode = rootViewNode, onSelect = {}) }
 
             onNodeWithText(testNodeLabel).assertIsSelectable()
             onNodeWithText(testNodeLabel).assertIsSelected()
@@ -87,8 +80,8 @@ class DirectoryTreeTest {
     @Test
     fun `selecting an item by clicking it`() {
         with(composeTestRule) {
-            var selectedViewNode: ViewNode? by mutableStateOf(listOfViewNodes[0])
-            setContent { DirectoryTree(listOfViewNodes, selectedViewNode, onSelect = { selectedViewNode = it }) }
+            var selectedViewNode: ViewNode? by mutableStateOf(rootViewNode)
+            setContent { DirectoryTree(rootViewNode, selectedViewNode, onSelect = { selectedViewNode = it }) }
 
             onNodeWithText(testChildNodeLabel).performClick()
             waitForIdle()
@@ -101,8 +94,8 @@ class DirectoryTreeTest {
     @Test
     fun `clearing the selection by pressing Escape`() {
         with(composeTestRule) {
-            var selectedViewNode: ViewNode? by mutableStateOf(listOfViewNodes[0])
-            setContent { DirectoryTree(listOfViewNodes, selectedViewNode, onSelect = { selectedViewNode = it }) }
+            var selectedViewNode: ViewNode? by mutableStateOf(rootViewNode)
+            setContent { DirectoryTree(rootViewNode, selectedViewNode, onSelect = { selectedViewNode = it }) }
 
             onNode(isFocusable()).performClick()
             waitForIdle()
@@ -117,8 +110,8 @@ class DirectoryTreeTest {
     @Test
     fun `selecting the next item by pressing the down arrow`() {
         with(composeTestRule) {
-            var selectedViewNode: ViewNode? by mutableStateOf(listOfViewNodes[0])
-            setContent { DirectoryTree(listOfViewNodes, selectedViewNode, onSelect = { selectedViewNode = it }) }
+            var selectedViewNode: ViewNode? by mutableStateOf(rootViewNode)
+            setContent { DirectoryTree(rootViewNode, selectedViewNode, onSelect = { selectedViewNode = it }) }
 
             onNode(isFocusable()).performClick()
             waitForIdle()
@@ -133,8 +126,8 @@ class DirectoryTreeTest {
     @Test
     fun `selecting the previous item by pressing the up arrow`() {
         with(composeTestRule) {
-            var selectedViewNode: ViewNode? by mutableStateOf(listOfViewNodes[1])
-            setContent { DirectoryTree(listOfViewNodes, selectedViewNode, onSelect = { selectedViewNode = it }) }
+            var selectedViewNode: ViewNode? by mutableStateOf(rootViewNode.firstChild!!)
+            setContent { DirectoryTree(rootViewNode, selectedViewNode, onSelect = { selectedViewNode = it }) }
 
             onNode(isFocusable()).performClick()
             waitForIdle()
@@ -148,18 +141,18 @@ class DirectoryTreeTest {
 
     @Test
     fun `expanding a node and selecting its first child by pressing the right arrow`() {
-        viewNode.isExpanded = false
+        rootViewNode.isExpanded = false
 
         with(composeTestRule) {
-            var selectedViewNode: ViewNode? by mutableStateOf(listOfViewNodes[0])
-            setContent { DirectoryTree(listOfViewNodes, selectedViewNode, onSelect = { selectedViewNode = it }) }
+            var selectedViewNode: ViewNode? by mutableStateOf(rootViewNode)
+            setContent { DirectoryTree(rootViewNode, selectedViewNode, onSelect = { selectedViewNode = it }) }
 
             onNode(isFocusable()).performClick()
             waitForIdle()
             onRoot().performKeyPress(keyEvent(Key.DirectionRight, KeyEventType.KeyDown))
             waitForIdle()
 
-            assertEquals(true, viewNode.isExpanded)
+            assertEquals(true, rootViewNode.isExpanded)
             onNodeWithText(testNodeLabel).assertIsNotSelected()
             onNodeWithText(testChildNodeLabel).assertIsSelected()
         }
@@ -167,23 +160,20 @@ class DirectoryTreeTest {
 
     @Test
     fun `collapsing the parent node and selecting it first child by pressing the left arrow`() {
-        viewNode.isExpanded = true
-        viewNode.firstChild!!.isExpanded = true
-        viewNode.firstChild!!.initChildren()
-        val mutableListOfViewNodes = mutableListOf<ViewNode>()
-        viewNode.addVisibleViewNodesDepthFirst(mutableListOfViewNodes)
-        listOfViewNodes = mutableListOfViewNodes
+        rootViewNode.isExpanded = true
+        rootViewNode.firstChild!!.isExpanded = true
+        rootViewNode.firstChild!!.initChildren()
 
         with(composeTestRule) {
-            var selectedViewNode: ViewNode? by mutableStateOf(listOfViewNodes[2])
-            setContent { DirectoryTree(listOfViewNodes, selectedViewNode, onSelect = { selectedViewNode = it }) }
+            var selectedViewNode: ViewNode? by mutableStateOf(rootViewNode.firstChild!!.firstChild!!)
+            setContent { DirectoryTree(rootViewNode, selectedViewNode, onSelect = { selectedViewNode = it }) }
 
             onNode(isFocusable()).performClick()
             waitForIdle()
             onRoot().performKeyPress(keyEvent(Key.DirectionLeft, KeyEventType.KeyDown))
             waitForIdle()
 
-            assertEquals(false, viewNode.firstChild!!.isExpanded)
+            assertEquals(false, rootViewNode.firstChild!!.isExpanded)
             onNodeWithText(testNodeLabel).assertIsNotSelected()
             onNodeWithText(testChildNodeLabel).assertIsSelected()
             onNodeWithText(testGrandChildNodeLabel).assertIsNotSelected()
