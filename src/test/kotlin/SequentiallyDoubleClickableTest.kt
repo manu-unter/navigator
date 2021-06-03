@@ -1,7 +1,7 @@
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import org.junit.Assert.fail
 import org.junit.Rule
@@ -25,7 +25,9 @@ class SequentiallyDoubleClickableTest {
                 )
             }
 
-            onRoot().performClick()
+            onNode(hasClickAction()).performClick()
+
+            waitForIdle()
 
             assert(wasOnClickCalled)
         }

@@ -39,11 +39,13 @@ A file system navigator, written as a test assignment for JetBrains
     - [ ] Scrolling performance analysis - Scrolling still lags a bit in large directories despite the `LazyColumn` -
       will investigate this if I still find the time
 - [ ] Test Coverage
-    - [ ] DirectoryTree component
+    - [ ] Top-level component
+    - [x] DirectoryTree component
     - [x] DirectoryTreeItem component
     - [x] Preview component
     - [x] Node
     - [x] ViewNode
+    - [ ] Modifier.sequentiallyDoubleClickable (don't work)
 ## Extending the Functionality
 
 The navigator is designed to be easily extensible with new file formats in two ways:
