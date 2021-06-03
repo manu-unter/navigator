@@ -7,7 +7,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -18,8 +20,9 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun DirectoryTree(
-    rootViewNode: ViewNode,
-    selectionState: MutableState<ViewNode?> = remember { mutableStateOf<ViewNode?>(null) },
+    listOfViewNodes: List<ViewNode>,
+    selectedViewNode: ViewNode?,
+    onSelect: (ViewNode?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val lazyListState = rememberLazyListState()
@@ -33,14 +36,6 @@ fun DirectoryTree(
         if (isFocused) 2.dp else 1.dp,
         tween(durationMillis = 150)
     )
-
-    val listOfViewNodes by remember(rootViewNode) {
-        derivedStateOf {
-            val list = mutableListOf<ViewNode>()
-            rootViewNode.addVisibleViewNodesDepthFirst(list)
-            list
-        }
-    }
 
     Box(
         modifier = modifier
@@ -58,30 +53,29 @@ fun DirectoryTree(
             )
             .clickable { focusRequester.requestFocus() }
             .shortcuts {
-                on(Key.Escape) { selectionState.value = null }
+                on(Key.Escape) { onSelect(null) }
                 on(Key.DirectionUp) {
-                    val currentSelectionIndex = listOfViewNodes.indexOf(selectionState.value)
+                    val currentSelectionIndex = listOfViewNodes.indexOf(selectedViewNode)
                     if (currentSelectionIndex > 0) {
-                        selectionState.value = listOfViewNodes.get(listOfViewNodes.indexOf(selectionState.value) - 1)
+                        onSelect(listOfViewNodes[currentSelectionIndex - 1])
                     }
                 }
                 on(Key.DirectionDown) {
-                    val currentSelectionIndex = listOfViewNodes.indexOf(selectionState.value)
+                    val currentSelectionIndex = listOfViewNodes.indexOf(selectedViewNode)
                     if (currentSelectionIndex < listOfViewNodes.size - 1) {
-                        selectionState.value = listOfViewNodes.get(listOfViewNodes.indexOf(selectionState.value) + 1)
+                        onSelect(listOfViewNodes[currentSelectionIndex + 1])
                     }
                 }
                 on(Key.DirectionLeft) {
-                    selectionState.value?.parent?.let {
-                        selectionState.value = it
+                    selectedViewNode?.parent?.let {
+                        onSelect(it)
                         it.isExpanded = false
                     }
                 }
                 on(Key.DirectionRight) {
-                    selectionState.value?.firstChild?.let {
-                        selectionState.value!!.isExpanded = true
-                        selectionState.value = it
-
+                    selectedViewNode?.firstChild?.let {
+                        selectedViewNode.isExpanded = true
+                        onSelect(it)
                     }
                 }
             }) {
@@ -91,10 +85,10 @@ fun DirectoryTree(
                 val viewNode = listOfViewNodes[index]
                 DirectoryTreeItem(
                     viewNode,
-                    isSelected = selectionState.value === viewNode,
+                    isSelected = selectedViewNode === viewNode,
                     onSelect = {
                         focusRequester.requestFocus()
-                        selectionState.value = viewNode
+                        onSelect(viewNode)
                     },
                     isFocused = isFocused
                 )

@@ -27,7 +27,8 @@ fun main() = application {
 
         var rootPath by remember { mutableStateOf(getInitialRootPath()) }
         val rootViewNode by remember { derivedStateOf { getValidRootViewNode(rootPath) } }
-        val selectionState = remember { mutableStateOf<ViewNode?>(rootViewNode) }
+        var selectedViewNode by remember { mutableStateOf<ViewNode?>(rootViewNode) }
+        val listOfViewNodes by remember { derivedStateOf { getValidListOfViewNodes(rootViewNode) } }
 
         ApplicationTheme {
             Row(Modifier.fillMaxSize().background(color = MaterialTheme.colors.background)) {
@@ -40,8 +41,12 @@ fun main() = application {
                             modifier = Modifier.fillMaxWidth(),
                         )
                         Spacer(Modifier.height(2.dp))
-                        if (rootViewNode != null) {
-                            DirectoryTree(rootViewNode!!, selectionState)
+                        if (listOfViewNodes != null) {
+                            DirectoryTree(
+                                listOfViewNodes!!,
+                                selectedViewNode,
+                                onSelect = { selectedViewNode = it }
+                            )
                         } else {
                             CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
                                 Text("Please provide a valid path", Modifier.padding(24.dp, 0.dp))
@@ -50,7 +55,7 @@ fun main() = application {
                     }
                 }
                 Preview(
-                    selectionState.value?.node,
+                    selectedViewNode?.node,
                     modifier = Modifier.fillMaxHeight().weight(2f)
                 )
             }
@@ -80,4 +85,13 @@ fun getValidRootViewNode(path: String): ViewNode? {
     }
 
     return ViewNode(Node(file.canonicalFile))
+}
+
+fun getValidListOfViewNodes(rootViewNode: ViewNode?): List<ViewNode>? {
+    if (rootViewNode == null) {
+        return null
+    }
+    val list = mutableListOf<ViewNode>()
+    rootViewNode.addVisibleViewNodesDepthFirst(list)
+    return list
 }
