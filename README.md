@@ -38,14 +38,14 @@ A file system navigator, written as a test assignment for JetBrains
       > `LazyColumn` without animations.
     - [ ] Scrolling performance analysis - Scrolling still lags a bit in large directories despite the `LazyColumn` -
       will investigate this if I still find the time
-- [ ] Test Coverage
+- [x] Test Coverage
     - [x] Navigator component (most are deactivated due to missing test API implementations)
     - [x] DirectoryTree component
     - [x] DirectoryTreeItem component
-    - [x] Preview component
+    - [x] Preview component (flaky, see #4)
     - [x] Node
     - [x] ViewNode
-    - [ ] Modifier.sequentiallyDoubleClickable (don't work)
+    - [x] Modifier.sequentiallyDoubleClickable (don't work, see #3)
 ## Extending the Functionality
 
 The navigator is designed to be easily extensible with new file formats in two ways:

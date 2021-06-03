@@ -3,7 +3,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
-import org.junit.Assert.fail
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 
@@ -12,7 +14,7 @@ class SequentiallyDoubleClickableTest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun `call onClick immediately when a click comes in`() {
+    fun `calling onClick immediately when a click comes in`() {
         var wasOnClickCalled = false
 
         with(composeTestRule) {
@@ -20,16 +22,85 @@ class SequentiallyDoubleClickableTest {
                 Box(
                     Modifier.sequentiallyDoubleClickable(
                         onClick = { wasOnClickCalled = true },
-                        onDoubleClick = { fail("onDoubleClick should not be called on the first click") }
+                        onDoubleClick = {}
                     )
                 )
             }
 
             onNode(hasClickAction()).performClick()
-
             waitForIdle()
 
-            assert(wasOnClickCalled)
+            assertTrue(wasOnClickCalled)
+        }
+    }
+
+    @Ignore("Activate once mainClock has been implemented")
+    @Test
+    fun `calling onDoubleClick when the second click comes in`() {
+        var wasOnDoubleClickCalled = false
+
+        with(composeTestRule) {
+            setContent {
+                Box(
+                    Modifier.sequentiallyDoubleClickable(
+                        onClick = { },
+                        onDoubleClick = { wasOnDoubleClickCalled = true }
+                    )
+                )
+            }
+
+            onNode(hasClickAction()).performClick()
+            mainClock.advanceTimeBy(100)
+            onNode(hasClickAction()).performClick()
+            waitForIdle()
+
+            assertTrue(wasOnDoubleClickCalled)
+        }
+    }
+
+    @Test
+    fun `not calling onDoubleClick when the second click comes in too early`() {
+        var wasOnDoubleClickCalled = false
+
+        with(composeTestRule) {
+            setContent {
+                Box(
+                    Modifier.sequentiallyDoubleClickable(
+                        onClick = { },
+                        onDoubleClick = { wasOnDoubleClickCalled = true }
+                    )
+                )
+            }
+
+            onNode(hasClickAction()).performClick()
+            onNode(hasClickAction()).performClick()
+            waitForIdle()
+
+            assertFalse(wasOnDoubleClickCalled)
+        }
+    }
+
+    @Ignore("Activate once mainClock has been implemented")
+    @Test
+    fun `not calling onDoubleClick when the second click comes in too late`() {
+        var wasOnDoubleClickCalled = false
+
+        with(composeTestRule) {
+            setContent {
+                Box(
+                    Modifier.sequentiallyDoubleClickable(
+                        onClick = { },
+                        onDoubleClick = { wasOnDoubleClickCalled = true }
+                    )
+                )
+            }
+
+            onNode(hasClickAction()).performClick()
+            mainClock.advanceTimeBy(500)
+            onNode(hasClickAction()).performClick()
+            waitForIdle()
+
+            assertFalse(wasOnDoubleClickCalled)
         }
     }
 }
