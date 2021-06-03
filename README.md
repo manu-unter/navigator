@@ -1,10 +1,12 @@
 # navigator
 
+![](docs/screenshot.png)
+
 A file system navigator, written as a test assignment for JetBrains
 
 ## Implementation Progress
 
-### Functional Requirements
+### Features
 
 - [x] Tree view of the file system
 - [x] Preview panel on the side
@@ -17,7 +19,7 @@ A file system navigator, written as a test assignment for JetBrains
     - [ ] Optimizing the usability with a screen-reader
 - [ ] TBD: Icons?
 
-### Non-Functional Requirements
+### Quality
 
 - [ ] Polished and consistent UI with carefully designed:
     - [x] Spacing
