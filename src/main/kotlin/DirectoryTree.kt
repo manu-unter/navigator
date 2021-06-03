@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -20,15 +21,23 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun DirectoryTree(
-    listOfViewNodes: List<ViewNode>,
+    rootViewNode: ViewNode,
     selectedViewNode: ViewNode?,
     onSelect: (ViewNode?) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val listOfViewNodes by remember {
+        derivedStateOf {
+            val list = mutableListOf<ViewNode>()
+            rootViewNode.addVisibleViewNodesDepthFirst(list)
+            list
+        }
+    }
+
     val lazyListState = rememberLazyListState()
     val scrollbarAdapter = rememberScrollbarAdapter(lazyListState)
     val mutableInteractionSource = remember { MutableInteractionSource() }
-    val focusRequester = FocusRequester()
+    val focusRequester = remember { FocusRequester() }
 
     val isFocused by mutableInteractionSource.collectIsFocusedAsState()
 

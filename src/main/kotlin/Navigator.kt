@@ -12,7 +12,6 @@ fun Navigator() {
     var rootPath by remember { mutableStateOf(getInitialRootPath()) }
     val rootViewNode by remember { derivedStateOf { getValidRootViewNode(rootPath) } }
     var selectedViewNode by remember { mutableStateOf<ViewNode?>(rootViewNode) }
-    val listOfViewNodes by remember { derivedStateOf { getValidListOfViewNodes(rootViewNode) } }
 
     Row(Modifier.fillMaxSize().background(color = MaterialTheme.colors.background)) {
         Surface(Modifier.weight(1f)) {
@@ -23,9 +22,9 @@ fun Navigator() {
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(Modifier.height(2.dp))
-                if (listOfViewNodes != null) {
+                if (rootViewNode != null) {
                     DirectoryTree(
-                        listOfViewNodes!!,
+                        rootViewNode!!,
                         selectedViewNode,
                         onSelect = { selectedViewNode = it }
                     )
@@ -56,13 +55,4 @@ private fun getValidRootViewNode(path: String): ViewNode? {
     }
 
     return ViewNode(Node(file.canonicalFile))
-}
-
-private fun getValidListOfViewNodes(rootViewNode: ViewNode?): List<ViewNode>? {
-    if (rootViewNode == null) {
-        return null
-    }
-    val list = mutableListOf<ViewNode>()
-    rootViewNode.addVisibleViewNodesDepthFirst(list)
-    return list
 }
