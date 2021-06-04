@@ -21,10 +21,10 @@ A file system navigator, written as a test assignment for JetBrains
 
 ### Quality
 
-- [ ] Polished and consistent UI with carefully designed:
+- [x] Polished and consistent UI with carefully designed:
     - [x] Spacing
     - [x] Animations
-    - [ ] Typography
+    - [x] Typography
     - [x] Colors
 - [x] Performance:
   ~~How many nodes can it display before stuttering? Virtualization? Lazy loading? I'll start without any of that and
