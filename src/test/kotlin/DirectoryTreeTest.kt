@@ -159,7 +159,7 @@ class DirectoryTreeTest {
     }
 
     @Test
-    fun `collapsing the parent node and selecting it first child by pressing the left arrow`() {
+    fun `collapsing the parent node and selecting its first child by pressing the left arrow`() {
         rootViewNode.isExpanded = true
         rootViewNode.firstChild!!.isExpanded = true
         rootViewNode.firstChild!!.initChildren()
@@ -176,7 +176,7 @@ class DirectoryTreeTest {
             assertEquals(false, rootViewNode.firstChild!!.isExpanded)
             onNodeWithText(testNodeLabel).assertIsNotSelected()
             onNodeWithText(testChildNodeLabel).assertIsSelected()
-            onNodeWithText(testGrandChildNodeLabel).assertIsNotSelected()
+            onNodeWithText(testGrandChildNodeLabel).assertDoesNotExist()
         }
     }
 }
