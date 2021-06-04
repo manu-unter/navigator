@@ -1,3 +1,4 @@
+import androidx.compose.foundation.BoxWithTooltip
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -10,9 +11,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -43,52 +42,63 @@ fun DirectoryTreeItem(
         else Color.Transparent,
         modifier = modifier
     ) {
-        Row(
-            Modifier.fillMaxWidth()
-                .selectable(
-                    selected = isSelected,
-                    onClick = {/* overwritten below */ }
+        var wasLabelTruncated: Boolean by remember { mutableStateOf(false) }
+        BoxWithTooltip(tooltip = {
+            if (wasLabelTruncated) Surface {
+                Text(
+                    viewNode.node.label,
+                    Modifier.padding(12.dp)
                 )
-                .sequentiallyDoubleClickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = {
-                        onSelect()
-                    },
-                    onDoubleClick = {
-                        viewNode.isExpanded = !viewNode.isExpanded
-                    },
-                )
-        ) {
-            Spacer(Modifier.width(ICON_SIZE * viewNode.level))
-            if (viewNode.hasChildren()) {
-                if (viewNode.isExpanded) {
-                    NodeIcon(
-                        Icons.Default.KeyboardArrowDown,
-                        contentDescription = "Collapse icon",
-                        Modifier.clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) { viewNode.isExpanded = false }
-                    )
-                } else {
-                    NodeIcon(
-                        Icons.Default.KeyboardArrowRight,
-                        contentDescription = "Expand icon",
-                        Modifier.clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) { viewNode.isExpanded = true }
-                    )
-                }
-            } else {
-                Spacer(Modifier.size(ICON_SIZE))
             }
-            Text(
-                viewNode.node.label,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+        }) {
+            Row(
+                Modifier.fillMaxWidth()
+                    .selectable(
+                        selected = isSelected,
+                        onClick = {/* overwritten below */ }
+                    )
+                    .sequentiallyDoubleClickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = {
+                            onSelect()
+                        },
+                        onDoubleClick = {
+                            viewNode.isExpanded = !viewNode.isExpanded
+                        },
+                    )
+            ) {
+                Spacer(Modifier.width(ICON_SIZE * viewNode.level))
+                if (viewNode.hasChildren()) {
+                    if (viewNode.isExpanded) {
+                        NodeIcon(
+                            Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Collapse icon",
+                            Modifier.clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) { viewNode.isExpanded = false }
+                        )
+                    } else {
+                        NodeIcon(
+                            Icons.Default.KeyboardArrowRight,
+                            contentDescription = "Expand icon",
+                            Modifier.clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) { viewNode.isExpanded = true }
+                        )
+                    }
+                } else {
+                    Spacer(Modifier.size(ICON_SIZE))
+                }
+                Text(
+                    viewNode.node.label,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    onTextLayout = { wasLabelTruncated = it.isLineEllipsized(0) }
+                )
+            }
         }
     }
 }
