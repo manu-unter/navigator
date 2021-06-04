@@ -1,18 +1,18 @@
 package model
 
+import org.apache.tika.Tika
 import java.io.File
 import java.io.InputStream
-import java.net.URLConnection
 
 
 interface Node {
     val label: String
 }
 
+val tika = Tika()
+
 fun Node(file: File): Node {
-    // This method of inferring the content type is rather limited - it will only identify basic file extensions.
-    // We could extend it with https://tika.apache.org/ to also support Markdown etc.
-    val contentType: String? = URLConnection.guessContentTypeFromName(file.name)
+    val contentType: String? = tika.detect(file.name)
 
     // Extend this with a mapping for other node types, e.g. zip files, and add a corresponding subclass of
     // FileSystemNode which lists its children
