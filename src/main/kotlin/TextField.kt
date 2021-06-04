@@ -34,7 +34,7 @@ fun TextField(value: String, onValueChange: (value: String) -> Unit, modifier: M
     ) { innerTextField ->
         Surface(
             color = MaterialTheme.colors.surface,
-            elevation = 12.dp,
+            elevation = 8.dp,
             border = if (isFocused) BorderStroke(width = borderWidth, color = MaterialTheme.colors.primary) else null,
         ) {
             Box(modifier = modifier.padding(8.dp, 4.dp)) {

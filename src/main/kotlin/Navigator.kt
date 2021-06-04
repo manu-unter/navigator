@@ -11,7 +11,7 @@ import java.io.File
 fun Navigator() {
     var rootPath by remember { mutableStateOf(getInitialRootPath()) }
     val rootViewNode by remember { derivedStateOf { getValidRootViewNode(rootPath) } }
-    var selectedViewNode by remember { mutableStateOf<ViewNode?>(rootViewNode) }
+    var selectedViewNode: ViewNode? by remember { mutableStateOf(rootViewNode) }
 
     Row(Modifier.fillMaxSize().background(color = MaterialTheme.colors.background)) {
         Surface(Modifier.weight(1f)) {

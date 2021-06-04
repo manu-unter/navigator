@@ -144,4 +144,42 @@ class PreviewTest {
             onNodeWithText("Select a file to see a preview").assertExists()
         }
     }
+
+    @Test
+    fun `show an error message when the content of a text node cannot be read`() {
+        val testNode = object : Node, ContentReadable {
+            override val label = "Test Text Node"
+            override val contentType = "text/plain"
+            override fun contentInputStream(): InputStream {
+                throw Error()
+            }
+        }
+
+        with(composeTestRule) {
+            setContent { Preview(testNode) }
+
+            // TODO Activate once this is implemented
+//            onNodeWithText("Select a file to see a preview").assertIsDisplayed()
+            onNodeWithText("Could not read file for preview").assertExists()
+        }
+    }
+
+    @Test
+    fun `show an error message when the content of an image node cannot be read`() {
+        val testNode = object : Node, ContentReadable {
+            override val label = "Test Image Node"
+            override val contentType = "image/png"
+            override fun contentInputStream(): InputStream {
+                throw Error()
+            }
+        }
+
+        with(composeTestRule) {
+            setContent { Preview(testNode) }
+
+            // TODO Activate once this is implemented
+//            onNodeWithText("Select a file to see a preview").assertIsDisplayed()
+            onNodeWithText("Could not read file for preview").assertExists()
+        }
+    }
 }

@@ -23,6 +23,7 @@ import kotlinx.coroutines.withContext
 import model.ContentReadable
 import model.Node
 import org.jetbrains.skija.Image
+import java.io.InputStream
 
 @Composable
 fun Preview(node: Node?, modifier: Modifier = Modifier) {
@@ -51,21 +52,30 @@ fun Preview(node: Node?, modifier: Modifier = Modifier) {
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun TextPreview(contentReadable: ContentReadable) {
-    val previewText by produceState<String?>(initialValue = null, contentReadable) {
+    val previewTextResult by produceState<Result<String>?>(initialValue = null, contentReadable) {
         withContext(Dispatchers.IO) {
-            with(contentReadable.contentInputStream().reader()) {
-                value = readText()
+            var contentInputStream: InputStream? = null
+            value = try {
+                contentInputStream = contentReadable.contentInputStream()
+                Result.success(contentInputStream.reader().readText())
+            } catch (throwable: Throwable) {
+                Result.failure(throwable)
+            } finally {
                 @Suppress("BlockingMethodInNonBlockingContext")
-                close()
+                contentInputStream?.close()
             }
         }
     }
 
     AnimatedVisibility(
-        visible = previewText != null,
+        visible = previewTextResult != null,
         enter = fadeIn() + slideInHorizontally(initialOffsetX = { -it / 8 })
     ) {
-        Text(previewText!!, fontFamily = FontFamily.Monospace)
+        if (previewTextResult!!.isSuccess) {
+            Text(previewTextResult!!.getOrThrow(), fontFamily = FontFamily.Monospace)
+        } else {
+            ErrorMessage("Could not read file for preview")
+        }
     }
 }
 
@@ -73,20 +83,27 @@ private fun TextPreview(contentReadable: ContentReadable) {
 @Composable
 private fun ImagePreview(contentReadable: ContentReadable) {
     val localDensity = LocalDensity.current
-    val imagePreviewPainter by produceState<Painter?>(initialValue = null, contentReadable, localDensity) {
+    val imagePreviewPainter by produceState<Result<Painter>?>(initialValue = null, contentReadable, localDensity) {
         withContext(Dispatchers.IO) {
-            val contentInputStream = contentReadable.contentInputStream()
+            var contentInputStream: InputStream? = null
+            value = try {
+                contentInputStream = contentReadable.contentInputStream()
 
-            @Suppress("BlockingMethodInNonBlockingContext")
-            value = when (contentReadable.contentType) {
-                "image/svg+xml" -> loadSvgResource(contentInputStream, localDensity)
-                else -> BitmapPainter(
-                    Image.makeFromEncoded(contentInputStream.readAllBytes()).asImageBitmap()
-                )
+                @Suppress("BlockingMethodInNonBlockingContext")
+                val painter = when (contentReadable.contentType) {
+                    "image/svg+xml" -> loadSvgResource(contentInputStream, localDensity)
+                    else -> BitmapPainter(
+                        Image.makeFromEncoded(contentInputStream.readAllBytes()).asImageBitmap()
+                    )
+                }
+
+                Result.success(painter)
+            } catch (throwable: Throwable) {
+                Result.failure(throwable)
+            } finally {
+                @Suppress("BlockingMethodInNonBlockingContext")
+                contentInputStream?.close()
             }
-
-            @Suppress("BlockingMethodInNonBlockingContext")
-            contentInputStream.close()
         }
     }
 
@@ -94,7 +111,11 @@ private fun ImagePreview(contentReadable: ContentReadable) {
         visible = imagePreviewPainter != null,
         enter = fadeIn() + slideInHorizontally(initialOffsetX = { -it / 8 }),
     ) {
-        Image(painter = imagePreviewPainter!!, contentDescription = "Image preview")
+        if (imagePreviewPainter!!.isSuccess) {
+            Image(painter = imagePreviewPainter!!.getOrThrow(), contentDescription = "Image preview")
+        } else {
+            ErrorMessage("Could not read file for preview")
+        }
     }
 }
 
@@ -102,5 +123,12 @@ private fun ImagePreview(contentReadable: ContentReadable) {
 private fun DimmedMessage(message: String) {
     CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
         Text(message)
+    }
+}
+
+@Composable
+private fun ErrorMessage(message: String) {
+    Surface(color = MaterialTheme.colors.error) {
+        Text(message, Modifier.padding(12.dp))
     }
 }
