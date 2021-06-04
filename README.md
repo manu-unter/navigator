@@ -15,7 +15,7 @@ A file system navigator, written as a test assignment for JetBrains
     - [x] Arrow keys navigate the directory tree
     - [x] Escape removes the selection
     - [ ] Tab switches between the input field and the directory tree
-    - [ ] Keeping the selected row in the view by scrolling if necessary
+    - [x] Keeping the selected row in the view by scrolling if necessary
     - [ ] Optimizing the usability with a screen-reader
 - [ ] TBD: Icons?
 
@@ -48,6 +48,7 @@ A file system navigator, written as a test assignment for JetBrains
     - [x] Node
     - [x] ViewNode
     - [x] Modifier.sequentiallyDoubleClickable (don't work, see [#3](https://github.com/manu-unter/navigator/issues/3))
+   
 ## Extending the Functionality
 
 The navigator is designed to be easily extensible with new file formats in two ways:

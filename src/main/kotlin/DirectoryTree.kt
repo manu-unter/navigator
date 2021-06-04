@@ -5,6 +5,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
@@ -32,6 +33,12 @@ fun DirectoryTree(
     var selectedViewNode by selectionState
 
     val lazyListState = rememberLazyListState()
+
+    LaunchedEffect(listOfViewNodes, selectedViewNode) {
+        val selectedItemIndex = listOfViewNodes.indexOf(selectedViewNode)
+        scrollSelectedViewNodeIntoViewportIfNecessary(lazyListState, selectedItemIndex)
+    }
+
     val scrollbarAdapter = rememberScrollbarAdapter(lazyListState)
     val mutableInteractionSource = remember { MutableInteractionSource() }
     val focusRequester = remember { FocusRequester() }
@@ -105,5 +112,42 @@ fun DirectoryTree(
         }
         VerticalScrollbar(scrollbarAdapter, Modifier.align(Alignment.CenterEnd))
     }
+}
 
+/**
+ * Triggers animateScrollIntoView() with the appropriate parameters when necessary to always keep the selected item
+ * fully visible in the viewport.
+ * This function assumes that all items have the same height!
+ */
+suspend fun scrollSelectedViewNodeIntoViewportIfNecessary(lazyListState: LazyListState, selectedItemIndex: Int) {
+    if (lazyListState.layoutInfo.visibleItemsInfo.isEmpty() || selectedItemIndex == -1) {
+        return
+    }
+
+    val firstFullyVisibleItemIndex =
+        if (lazyListState.firstVisibleItemScrollOffset == 0) {
+            lazyListState.firstVisibleItemIndex
+        } else {
+            lazyListState.firstVisibleItemIndex + 1
+        }
+    val itemSize = lazyListState.layoutInfo.visibleItemsInfo[0].size
+    val viewportSize = lazyListState.layoutInfo.viewportEndOffset - lazyListState.layoutInfo.viewportStartOffset
+    val maximumFullyVisibleItemCount = viewportSize / itemSize
+    val lastFullyVisibleItemIndex =
+        if (lazyListState.layoutInfo.visibleItemsInfo.last().offset + itemSize > lazyListState.layoutInfo.viewportEndOffset) {
+            lazyListState.layoutInfo.visibleItemsInfo.last().index - 1
+        } else {
+            lazyListState.layoutInfo.visibleItemsInfo.last().index
+        }
+
+    val cutOffItemHeight = itemSize - (viewportSize % itemSize)
+
+    if (selectedItemIndex < firstFullyVisibleItemIndex) {
+        lazyListState.animateScrollToItem(selectedItemIndex)
+    } else if (selectedItemIndex > lastFullyVisibleItemIndex) {
+        lazyListState.animateScrollToItem(
+            selectedItemIndex - maximumFullyVisibleItemCount,
+            cutOffItemHeight
+        )
+    }
 }
