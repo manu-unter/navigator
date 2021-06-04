@@ -1,6 +1,5 @@
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.keyEvent
@@ -36,14 +35,17 @@ class DirectoryTreeTest {
     }
     private val rootViewNode = ViewNode(testNode)
 
+
     init {
         rootViewNode.initChildren()
     }
 
     @Test
     fun `creating a DirectoryTree from a list of ViewNodes`() {
+        val selectionState: MutableState<ViewNode?> = mutableStateOf(null)
+
         with(composeTestRule) {
-            setContent { DirectoryTree(rootViewNode, selectedViewNode = null, onSelect = {}) }
+            setContent { DirectoryTree(rootViewNode, selectionState) }
 
             onNodeWithText(testNodeLabel).assertExists()
             onNodeWithText(testChildNodeLabel).assertExists()
@@ -53,8 +55,10 @@ class DirectoryTreeTest {
 
     @Test
     fun focusability() {
+        val selectionState: MutableState<ViewNode?> = mutableStateOf(null)
+
         with(composeTestRule) {
-            setContent { DirectoryTree(rootViewNode, selectedViewNode = null, onSelect = {}) }
+            setContent { DirectoryTree(rootViewNode, selectionState) }
 
             onNode(isFocusable()).assertExists()
 
@@ -67,8 +71,10 @@ class DirectoryTreeTest {
 
     @Test
     fun `initial selection state`() {
+        val selectionState: MutableState<ViewNode?> = mutableStateOf(rootViewNode)
+
         with(composeTestRule) {
-            setContent { DirectoryTree(rootViewNode, selectedViewNode = rootViewNode, onSelect = {}) }
+            setContent { DirectoryTree(rootViewNode, selectionState) }
 
             onNodeWithText(testNodeLabel).assertIsSelectable()
             onNodeWithText(testNodeLabel).assertIsSelected()
@@ -79,9 +85,10 @@ class DirectoryTreeTest {
 
     @Test
     fun `selecting an item by clicking it`() {
+        val selectionState: MutableState<ViewNode?> = mutableStateOf(rootViewNode)
+
         with(composeTestRule) {
-            var selectedViewNode: ViewNode? by mutableStateOf(rootViewNode)
-            setContent { DirectoryTree(rootViewNode, selectedViewNode, onSelect = { selectedViewNode = it }) }
+            setContent { DirectoryTree(rootViewNode, selectionState) }
 
             onNodeWithText(testChildNodeLabel).performClick()
             waitForIdle()
@@ -93,9 +100,10 @@ class DirectoryTreeTest {
 
     @Test
     fun `clearing the selection by pressing Escape`() {
+        val selectionState: MutableState<ViewNode?> = mutableStateOf(rootViewNode)
+
         with(composeTestRule) {
-            var selectedViewNode: ViewNode? by mutableStateOf(rootViewNode)
-            setContent { DirectoryTree(rootViewNode, selectedViewNode, onSelect = { selectedViewNode = it }) }
+            setContent { DirectoryTree(rootViewNode, selectionState) }
 
             onNode(isFocusable()).performClick()
             waitForIdle()
@@ -109,9 +117,10 @@ class DirectoryTreeTest {
 
     @Test
     fun `selecting the next item by pressing the down arrow`() {
+        val selectionState: MutableState<ViewNode?> = mutableStateOf(rootViewNode)
+
         with(composeTestRule) {
-            var selectedViewNode: ViewNode? by mutableStateOf(rootViewNode)
-            setContent { DirectoryTree(rootViewNode, selectedViewNode, onSelect = { selectedViewNode = it }) }
+            setContent { DirectoryTree(rootViewNode, selectionState) }
 
             onNode(isFocusable()).performClick()
             waitForIdle()
@@ -125,9 +134,10 @@ class DirectoryTreeTest {
 
     @Test
     fun `selecting the previous item by pressing the up arrow`() {
+        val selectionState: MutableState<ViewNode?> = mutableStateOf(rootViewNode.firstChild!!)
+
         with(composeTestRule) {
-            var selectedViewNode: ViewNode? by mutableStateOf(rootViewNode.firstChild!!)
-            setContent { DirectoryTree(rootViewNode, selectedViewNode, onSelect = { selectedViewNode = it }) }
+            setContent { DirectoryTree(rootViewNode, selectionState) }
 
             onNode(isFocusable()).performClick()
             waitForIdle()
@@ -142,10 +152,10 @@ class DirectoryTreeTest {
     @Test
     fun `expanding a node and selecting its first child by pressing the right arrow`() {
         rootViewNode.isExpanded = false
+        val selectionState: MutableState<ViewNode?> = mutableStateOf(rootViewNode)
 
         with(composeTestRule) {
-            var selectedViewNode: ViewNode? by mutableStateOf(rootViewNode)
-            setContent { DirectoryTree(rootViewNode, selectedViewNode, onSelect = { selectedViewNode = it }) }
+            setContent { DirectoryTree(rootViewNode, selectionState) }
 
             onNode(isFocusable()).performClick()
             waitForIdle()
@@ -163,10 +173,10 @@ class DirectoryTreeTest {
         rootViewNode.isExpanded = true
         rootViewNode.firstChild!!.isExpanded = true
         rootViewNode.firstChild!!.initChildren()
+        val selectionState: MutableState<ViewNode?> = mutableStateOf(rootViewNode.firstChild!!.firstChild!!)
 
         with(composeTestRule) {
-            var selectedViewNode: ViewNode? by mutableStateOf(rootViewNode.firstChild!!.firstChild!!)
-            setContent { DirectoryTree(rootViewNode, selectedViewNode, onSelect = { selectedViewNode = it }) }
+            setContent { DirectoryTree(rootViewNode, selectionState) }
 
             onNode(isFocusable()).performClick()
             waitForIdle()

@@ -11,7 +11,7 @@ import java.io.File
 fun Navigator() {
     var rootPath by remember { mutableStateOf(getInitialRootPath()) }
     val rootViewNode by remember { derivedStateOf { getValidRootViewNode(rootPath) } }
-    var selectedViewNode: ViewNode? by remember { mutableStateOf(rootViewNode) }
+    val selectionState: MutableState<ViewNode?> = remember { mutableStateOf(rootViewNode) }
 
     Row(Modifier.fillMaxSize().background(color = MaterialTheme.colors.background)) {
         Surface(Modifier.weight(1f)) {
@@ -25,8 +25,7 @@ fun Navigator() {
                 if (rootViewNode != null) {
                     DirectoryTree(
                         rootViewNode!!,
-                        selectedViewNode,
-                        onSelect = { selectedViewNode = it }
+                        selectionState,
                     )
                 } else {
                     CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
@@ -36,7 +35,7 @@ fun Navigator() {
             }
         }
         Preview(
-            selectedViewNode?.node,
+            selectionState.value?.node,
             modifier = Modifier.fillMaxHeight().weight(2f)
         )
     }
