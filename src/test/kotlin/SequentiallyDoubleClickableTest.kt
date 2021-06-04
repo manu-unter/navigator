@@ -1,4 +1,6 @@
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -21,6 +23,8 @@ class SequentiallyDoubleClickableTest {
             setContent {
                 Box(
                     Modifier.sequentiallyDoubleClickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
                         onClick = { wasOnClickCalled = true },
                         onDoubleClick = {}
                     )
@@ -43,6 +47,8 @@ class SequentiallyDoubleClickableTest {
             setContent {
                 Box(
                     Modifier.sequentiallyDoubleClickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
                         onClick = { },
                         onDoubleClick = { wasOnDoubleClickCalled = true }
                     )
@@ -66,6 +72,8 @@ class SequentiallyDoubleClickableTest {
             setContent {
                 Box(
                     Modifier.sequentiallyDoubleClickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
                         onClick = { },
                         onDoubleClick = { wasOnDoubleClickCalled = true }
                     )
@@ -89,6 +97,8 @@ class SequentiallyDoubleClickableTest {
             setContent {
                 Box(
                     Modifier.sequentiallyDoubleClickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
                         onClick = { },
                         onDoubleClick = { wasOnDoubleClickCalled = true }
                     )

@@ -1,4 +1,5 @@
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
@@ -11,6 +12,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -48,6 +50,8 @@ fun DirectoryTreeItem(
                     onClick = {/* overwritten below */ }
                 )
                 .sequentiallyDoubleClickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
                     onClick = {
                         onSelect()
                     },
@@ -62,13 +66,19 @@ fun DirectoryTreeItem(
                     NodeIcon(
                         Icons.Default.KeyboardArrowDown,
                         contentDescription = "Collapse icon",
-                        Modifier.clickable { viewNode.isExpanded = false }
+                        Modifier.clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { viewNode.isExpanded = false }
                     )
                 } else {
                     NodeIcon(
                         Icons.Default.KeyboardArrowRight,
                         contentDescription = "Expand icon",
-                        Modifier.clickable { viewNode.isExpanded = true }
+                        Modifier.clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) { viewNode.isExpanded = true }
                     )
                 }
             } else {

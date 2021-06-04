@@ -1,4 +1,6 @@
+import androidx.compose.foundation.Indication
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalViewConfiguration
@@ -13,12 +15,17 @@ import androidx.compose.ui.platform.LocalViewConfiguration
  * See https://github.com/JetBrains/compose-jb/issues/255 and https://issuetracker.google.com/issues/177929160
  */
 @Composable
-fun Modifier.sequentiallyDoubleClickable(onClick: () -> Unit, onDoubleClick: () -> Unit): Modifier {
+fun Modifier.sequentiallyDoubleClickable(
+    interactionSource: MutableInteractionSource,
+    indication: Indication?,
+    onClick: () -> Unit,
+    onDoubleClick: () -> Unit
+): Modifier {
     val doubleTapMinTimeMillis = LocalViewConfiguration.current.doubleTapMinTimeMillis
     val doubleTapTimeoutMillis = LocalViewConfiguration.current.doubleTapTimeoutMillis
     var lastClickTimeMillis: Long? by remember { mutableStateOf(null) }
 
-    return clickable {
+    return clickable(interactionSource, indication) {
         val isDoubleClick =
             lastClickTimeMillis?.let {
                 val millisSinceLastClick = System.currentTimeMillis() - it

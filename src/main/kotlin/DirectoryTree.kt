@@ -60,7 +60,10 @@ fun DirectoryTree(
                 else
                     Modifier
             )
-            .clickable { focusRequester.requestFocus() }
+            .clickable(
+                interactionSource = mutableInteractionSource,
+                indication = null
+            ) { focusRequester.requestFocus() }
             .shortcuts {
                 on(Key.Escape) { onSelect(null) }
                 on(Key.DirectionUp) {
