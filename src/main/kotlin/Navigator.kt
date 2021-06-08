@@ -2,6 +2,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import model.Node
@@ -29,7 +30,9 @@ fun Navigator() {
                     )
                 } else {
                     CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                        Text("Please provide a valid path", Modifier.padding(24.dp, 0.dp))
+                        Box(modifier = Modifier.height(24.dp), contentAlignment = Alignment.CenterStart) {
+                            Text("Please provide a valid path", Modifier.padding(24.dp, 0.dp))
+                        }
                     }
                 }
             }

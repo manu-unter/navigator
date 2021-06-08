@@ -10,6 +10,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.unit.dp
@@ -37,7 +38,7 @@ fun TextField(value: String, onValueChange: (value: String) -> Unit, modifier: M
             elevation = 8.dp,
             border = if (isFocused) BorderStroke(width = borderWidth, color = MaterialTheme.colors.primary) else null,
         ) {
-            Box(modifier = modifier.padding(8.dp, 4.dp)) {
+            Box(modifier = modifier.padding(8.dp, 6.dp), contentAlignment = Alignment.CenterStart) {
                 innerTextField()
             }
         }
