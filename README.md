@@ -39,8 +39,8 @@ A file system navigator, written as a test assignment for JetBrains
       > The `LazyColumn` [seems to keep me from using animations](https://stackoverflow.com/a/67452325/4887966) for
       > expanding and collapsing nodes. I decided to prioritize responsiveness over animations here and went for the
       > `LazyColumn` without animations.
-    - [ ] Scrolling performance analysis - Scrolling still lags a bit in large directories despite the `LazyColumn` -
-      will investigate this if I still find the time
+    - [x] Scrolling performance analysis - Scrolling works smoothly on macOS, which is why I blame the underlying
+      Windows implementation and won't spend more effort on this
 - [x] Test Coverage
     - [x] Navigator component (most are deactivated due to missing test API implementations)
     - [x] DirectoryTree component
@@ -49,7 +49,7 @@ A file system navigator, written as a test assignment for JetBrains
     - [x] Node
     - [x] ViewNode
     - [x] Modifier.sequentiallyDoubleClickable (don't work, see [#3](https://github.com/manu-unter/navigator/issues/3))
-   
+
 ## Extending the Functionality
 
 The navigator is designed to be easily extensible with new file formats in two ways:
