@@ -1,6 +1,6 @@
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -27,7 +27,7 @@ import java.io.InputStream
 
 @Composable
 fun Preview(node: Node?, modifier: Modifier = Modifier) {
-    Surface(color = MaterialTheme.colors.background, modifier = modifier.padding(12.dp)) {
+    Surface(color = MaterialTheme.colors.background, modifier = modifier) {
         Crossfade(targetState = node, animationSpec = tween(150), modifier = Modifier.fillMaxSize()) {
             Box(Modifier.fillMaxSize(), Alignment.Center) {
                 if (it != null) {
@@ -72,7 +72,15 @@ private fun TextPreview(contentReadable: ContentReadable) {
         enter = fadeIn() + slideInHorizontally(initialOffsetX = { -it / 8 })
     ) {
         if (previewTextResult!!.isSuccess) {
-            Text(previewTextResult!!.getOrThrow(), fontFamily = FontFamily.Monospace)
+            val scrollState = rememberScrollState()
+            Box(Modifier.fillMaxSize()) {
+                Text(
+                    previewTextResult!!.getOrThrow(),
+                    fontFamily = FontFamily.Monospace,
+                    modifier = Modifier.verticalScroll(scrollState).padding(12.dp).align(Alignment.Center),
+                )
+                VerticalScrollbar(adapter = rememberScrollbarAdapter(scrollState), Modifier.align(Alignment.CenterEnd))
+            }
         } else {
             ErrorMessage("Could not read file for preview")
         }
@@ -112,7 +120,11 @@ private fun ImagePreview(contentReadable: ContentReadable) {
         enter = fadeIn() + slideInHorizontally(initialOffsetX = { -it / 8 }),
     ) {
         if (imagePreviewPainter!!.isSuccess) {
-            Image(painter = imagePreviewPainter!!.getOrThrow(), contentDescription = "Image preview")
+            Image(
+                painter = imagePreviewPainter!!.getOrThrow(),
+                contentDescription = "Image preview",
+                modifier = Modifier.padding(12.dp)
+            )
         } else {
             ErrorMessage("Could not read file for preview")
         }
