@@ -16,6 +16,9 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.shortcuts
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+import java.lang.Integer.max
+import java.lang.Integer.min
 
 @Composable
 fun DirectoryTree(
@@ -33,11 +36,7 @@ fun DirectoryTree(
     var selectedViewNode by selectionState
 
     val lazyListState = rememberLazyListState()
-
-    LaunchedEffect(listOfViewNodes, selectedViewNode) {
-        val selectedItemIndex = listOfViewNodes.indexOf(selectedViewNode)
-        scrollSelectedViewNodeIntoViewportIfNecessary(lazyListState, selectedItemIndex)
-    }
+    val coroutineScope = rememberCoroutineScope()
 
     val scrollbarAdapter = rememberScrollbarAdapter(lazyListState)
     val mutableInteractionSource = remember { MutableInteractionSource() }
@@ -73,25 +72,41 @@ fun DirectoryTree(
                 on(Key.DirectionUp) {
                     val currentSelectionIndex = listOfViewNodes.indexOf(selectedViewNode)
                     if (currentSelectionIndex > 0) {
-                        selectedViewNode = listOfViewNodes[currentSelectionIndex - 1]
+                        val newSelectionIndex = currentSelectionIndex - 1
+                        selectedViewNode = listOfViewNodes[newSelectionIndex]
+                        coroutineScope.launch {
+                            scrollItemIntoViewportIfNecessary(lazyListState, newSelectionIndex)
+                        }
                     }
                 }
                 on(Key.DirectionDown) {
                     val currentSelectionIndex = listOfViewNodes.indexOf(selectedViewNode)
-                    if (currentSelectionIndex < listOfViewNodes.size - 1) {
-                        selectedViewNode = listOfViewNodes[currentSelectionIndex + 1]
+                    if (currentSelectionIndex < listOfViewNodes.lastIndex) {
+                        val newSelectionIndex = currentSelectionIndex + 1
+                        selectedViewNode = listOfViewNodes[newSelectionIndex]
+                        coroutineScope.launch {
+                            scrollItemIntoViewportIfNecessary(lazyListState, newSelectionIndex)
+                        }
                     }
                 }
                 on(Key.DirectionLeft) {
                     selectedViewNode?.parent?.let {
                         selectedViewNode = it
                         it.isExpanded = false
+                        coroutineScope.launch {
+                            val newSelectionIndex = listOfViewNodes.indexOf(it)
+                            scrollItemIntoViewportIfNecessary(lazyListState, newSelectionIndex)
+                        }
                     }
                 }
                 on(Key.DirectionRight) {
                     selectedViewNode?.firstChild?.let {
                         selectedViewNode!!.isExpanded = true
                         selectedViewNode = it
+                        coroutineScope.launch {
+                            val newSelectionIndex = listOfViewNodes.indexOf(it)
+                            scrollItemIntoViewportIfNecessary(lazyListState, newSelectionIndex)
+                        }
                     }
                 }
             }) {
@@ -115,12 +130,12 @@ fun DirectoryTree(
 }
 
 /**
- * Triggers animateScrollIntoView() with the appropriate parameters when necessary to always keep the selected item
- * fully visible in the viewport.
+ * Triggers animateScrollIntoView() with the appropriate parameters when necessary to move the given item fully into the
+ * viewport.
  * This function assumes that all items have the same height!
  */
-suspend fun scrollSelectedViewNodeIntoViewportIfNecessary(lazyListState: LazyListState, selectedItemIndex: Int) {
-    if (lazyListState.layoutInfo.visibleItemsInfo.isEmpty() || selectedItemIndex == -1) {
+suspend fun scrollItemIntoViewportIfNecessary(lazyListState: LazyListState, itemIndex: Int, paddingItemCount: Int = 3) {
+    if (lazyListState.layoutInfo.visibleItemsInfo.isEmpty() || itemIndex == -1) {
         return
     }
 
@@ -141,12 +156,14 @@ suspend fun scrollSelectedViewNodeIntoViewportIfNecessary(lazyListState: LazyLis
         }
 
     val cutOffItemHeight = itemSize - (viewportSize % itemSize)
+    val firstIndexToMakeVisible = max(0, itemIndex - paddingItemCount)
+    val lastIndexToMakeVisible = min(lazyListState.layoutInfo.totalItemsCount - 1, itemIndex + paddingItemCount)
 
-    if (selectedItemIndex < firstFullyVisibleItemIndex) {
-        lazyListState.animateScrollToItem(selectedItemIndex)
-    } else if (selectedItemIndex > lastFullyVisibleItemIndex) {
+    if (firstIndexToMakeVisible < firstFullyVisibleItemIndex) {
+        lazyListState.animateScrollToItem(firstIndexToMakeVisible)
+    } else if (lastIndexToMakeVisible > lastFullyVisibleItemIndex) {
         lazyListState.animateScrollToItem(
-            selectedItemIndex - maximumFullyVisibleItemCount,
+            lastIndexToMakeVisible - maximumFullyVisibleItemCount,
             cutOffItemHeight
         )
     }
