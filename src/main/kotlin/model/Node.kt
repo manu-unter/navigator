@@ -1,6 +1,7 @@
 package model
 
 import org.apache.tika.Tika
+import java.awt.Desktop
 import java.io.File
 import java.io.InputStream
 
@@ -32,6 +33,10 @@ interface ContentReadable {
     fun contentInputStream(): InputStream
 }
 
+interface Openable {
+    fun open()
+}
+
 private class FileSystemDirectory(val file: File) : Node, Expandable {
     override val label: String = file.name
 
@@ -51,13 +56,17 @@ private class FileSystemDirectory(val file: File) : Node, Expandable {
     }
 }
 
-private open class FileSystemFile(val file: File) : Node {
+private open class FileSystemFile(val file: File) : Node, Openable {
     override val label: String = file.name
 
     init {
         if (file.isDirectory) {
             throw Exception("Cannot create a FileSystemFile Node for a File which represents a directory")
         }
+    }
+
+    override fun open() {
+        Desktop.getDesktop().open(file)
     }
 }
 

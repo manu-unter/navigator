@@ -19,6 +19,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import model.Expandable
+import model.Openable
 
 @Composable
 fun DirectoryTreeItem(
@@ -64,7 +66,11 @@ fun DirectoryTreeItem(
                             onSelect()
                         },
                         onDoubleClick = {
-                            viewNode.isExpanded = !viewNode.isExpanded
+                            if (viewNode.node is Expandable) {
+                                viewNode.isExpanded = !viewNode.isExpanded
+                            } else if (viewNode.node is Openable) {
+                                viewNode.node.open()
+                            }
                         },
                     )
             ) {

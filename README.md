@@ -10,6 +10,7 @@ A file system navigator, written as a test assignment for JetBrains
 
 - [x] Tree view of the file system
 - [x] Preview panel on the side
+- [x] Files can be opened in their associated application with a double click
 - [x] Extensible tree, with capabilities to display other formats than just the file system as nodes - e.g. zip files
 - [ ] Keyboard Navigation & Accessibility
     - [x] Arrow keys navigate the directory tree
