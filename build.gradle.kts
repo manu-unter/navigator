@@ -20,6 +20,7 @@ repositories {
 dependencies {
     implementation(compose.desktop.currentOs)
     implementation("org.apache.tika:tika-core:1.26")
+    implementation(compose("org.jetbrains.compose.material:material-icons-extended"))
     testImplementation(compose("org.jetbrains.compose.ui:ui-test-junit4"))
 }
 

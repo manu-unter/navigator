@@ -18,7 +18,7 @@ A file system navigator, written as a test assignment for JetBrains
     - [ ] Tab switches between the input field and the directory tree
     - [x] Keeping the selected row in the view by scrolling if necessary
     - [ ] Optimizing the usability with a screen-reader
-- [ ] TBD: Icons?
+- [x] Icons
 
 ### Quality
 

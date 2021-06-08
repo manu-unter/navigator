@@ -4,22 +4,18 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import model.ContentReadable
 import model.Expandable
 import model.Openable
 
@@ -77,29 +73,7 @@ fun DirectoryTreeItem(
                     )
             ) {
                 Spacer(Modifier.width(ICON_SIZE * viewNode.level))
-                if (viewNode.hasChildren()) {
-                    if (viewNode.isExpanded) {
-                        NodeIcon(
-                            Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Collapse icon",
-                            Modifier.clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) { viewNode.isExpanded = false }
-                        )
-                    } else {
-                        NodeIcon(
-                            Icons.Default.KeyboardArrowRight,
-                            contentDescription = "Expand icon",
-                            Modifier.clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) { viewNode.isExpanded = true }
-                        )
-                    }
-                } else {
-                    Spacer(Modifier.size(ICON_SIZE))
-                }
+                NodeIcon(viewNode)
                 Text(
                     viewNode.node.label,
                     maxLines = 1,
@@ -114,10 +88,38 @@ fun DirectoryTreeItem(
 val ICON_SIZE = 24.dp
 
 @Composable
-private fun NodeIcon(imageVector: ImageVector, contentDescription: String, modifier: Modifier = Modifier) {
-    Icon(
-        imageVector,
-        contentDescription,
-        modifier = modifier.size(ICON_SIZE)
-    )
+private fun NodeIcon(viewNode: ViewNode) {
+    val modifier = Modifier.size(ICON_SIZE)
+    if (viewNode.hasChildren()) {
+        if (viewNode.isExpanded) {
+            Icon(
+                Icons.Default.KeyboardArrowDown,
+                contentDescription = "Collapse icon",
+                modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { viewNode.isExpanded = false }
+            )
+        } else {
+            Icon(
+                Icons.Default.KeyboardArrowRight,
+                contentDescription = "Expand icon",
+                modifier.clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { viewNode.isExpanded = true }
+            )
+        }
+    } else if (viewNode.node is ContentReadable) {
+        val contentDescription = "${viewNode.node.contentType} file icon"
+        when (viewNode.node.contentType.split("/")[0]) {
+            "image" -> Icon(Icons.Default.Image, contentDescription, modifier, tint = Color(0xFFb4d986))
+            "text" -> Icon(Icons.Default.Description, contentDescription, modifier, tint = Color(0xFF7BC7E0))
+            "video" -> Icon(Icons.Default.Movie, contentDescription, modifier, tint = Color(0xFFF5855D))
+            "application" -> Icon(Icons.Default.InsertDriveFile, contentDescription, modifier, tint = Color(0xFFddb6f0))
+            else -> Icon(Icons.Default.InsertDriveFile, contentDescription, modifier)
+        }
+    } else {
+        Spacer(modifier)
+    }
 }
