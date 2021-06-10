@@ -133,6 +133,8 @@ fun DirectoryTree(
  * Triggers animateScrollIntoView() with the appropriate parameters when necessary to move the given item fully into the
  * viewport.
  * This function assumes that all items have the same height!
+ * The `paddingItemCount` will only be respected when there is at least space for `paddingItemCount * 2 + 1` items.
+ * Otherwise, it will be reduced to avoid jumpiness while moving up and down with the selection.
  */
 suspend fun scrollItemIntoViewportIfNecessary(lazyListState: LazyListState, itemIndex: Int, paddingItemCount: Int = 3) {
     if (lazyListState.layoutInfo.visibleItemsInfo.isEmpty() || itemIndex == -1) {
@@ -155,9 +157,11 @@ suspend fun scrollItemIntoViewportIfNecessary(lazyListState: LazyListState, item
             lazyListState.layoutInfo.visibleItemsInfo.last().index
         }
 
+    val effectivePaddingItemCount = min(paddingItemCount, (maximumFullyVisibleItemCount.toFloat() / 2 - 1).toInt())
     val cutOffItemHeight = itemSize - (viewportSize % itemSize)
-    val firstIndexToMakeVisible = max(0, itemIndex - paddingItemCount)
-    val lastIndexToMakeVisible = min(lazyListState.layoutInfo.totalItemsCount - 1, itemIndex + paddingItemCount)
+    val firstIndexToMakeVisible = max(0, itemIndex - effectivePaddingItemCount)
+    val lastIndexToMakeVisible =
+        min(lazyListState.layoutInfo.totalItemsCount - 1, itemIndex + effectivePaddingItemCount)
 
     if (firstIndexToMakeVisible < firstFullyVisibleItemIndex) {
         lazyListState.animateScrollToItem(firstIndexToMakeVisible)
